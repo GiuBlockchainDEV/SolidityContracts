@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+pragma solidity ^0.8.14;
+
 //  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _                         
 // |   ____  _          ____                 |
 // |  / ___|(_) _   _  |  _ \   ___ __   __  |
@@ -7,8 +9,6 @@
 // | | |_| || || |_| | | |_| ||  __/ \ V /   |
 // |  \____||_| \__,_| |____/  \___|  \_/    |
 // | _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ | 
-
-pragma solidity ^0.8.14;
 
 //Giuliano Neroni DEV
 //https://www.giulianoneroni.com/
