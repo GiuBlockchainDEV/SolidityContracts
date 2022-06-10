@@ -716,14 +716,13 @@ contract starfighter is ERC721A, Ownable, ReentrancyGuard {
     //mapping(address => bool) public whitelistClaimed;
     mapping (address => bool) public whitelisted;
     mapping(address => uint) public minted;
-    string _tokenName = "Name";
-    string _tokenSymbol = "NM";
-    uint256 _maxSupply = 333;
-    uint256 _maxMintAmountPerTx = 12;
-    string _hiddenMetadataUri = "ipfs://";
 
     
-    constructor() 
+    constructor(string memory _tokenName,
+        string memory _tokenSymbol,
+        uint256 _maxSupply,
+        uint256 _maxMintAmountPerTx,
+        string memory _hiddenMetadataUri) 
         ERC721A(_tokenName, _tokenSymbol, _soulbound, _msgSender()) {
             maxSupply = _maxSupply;
             setMaxMintAmountPerTx(_maxMintAmountPerTx);
