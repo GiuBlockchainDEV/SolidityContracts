@@ -690,7 +690,7 @@ contract starfighter is ERC721A, Ownable, ReentrancyGuard {
     mapping (address => bool) public whitelisted;
     mapping(address => uint) public minted;
 
-    string public tokenName = "Starfighter club";
+    string public tokenName = "STARFIGHTER CLUB";
     string public tokenSymbol = "SFC";
     uint256 public maxSupply = 333;
     uint256 public maxMintAmountPerTx = 12;
