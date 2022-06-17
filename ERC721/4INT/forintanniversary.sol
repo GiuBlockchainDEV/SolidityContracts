@@ -717,7 +717,7 @@ library Strings {
     function toHexString(address addr) internal pure returns (string memory) {
         return toHexString(uint256(uint160(addr)), _ADDRESS_LENGTH);}}
 
-contract starfighter is ERC721A, ERC20, Ownable, ReentrancyGuard {
+contract forint_anniversary is ERC721A, ERC20, Ownable, ReentrancyGuard {
 
     using Strings for uint256;
 
