@@ -693,20 +693,20 @@ contract MultisigDH is ERC721A, Ownable, ReentrancyGuard {
         require(proposalEnded[_idproposal] == true || proposals[_idproposal].timeend <= block.timestamp, "Proposal not ended"); 
         require(proposalPassed[_idproposal] == true, "Proposal not passed");    
         require(proposalExecuted[_idproposal] == false, "Already paid"); 
-        require(proposals[_idproposal].typeproposal == 3, "Wrong function");
+        require(proposals[_idproposal].typeproposal == 10, "Wrong function");
 
         old_type_IERC20(proposals[_idproposal].tokenAddr).transfer(proposals[_idproposal].to, proposals[_idproposal].value);
         
         proposalExecuted[_idproposal] = true;}
 
     //TRANSFER ETHER
-    //PROPOSAL -> 20
+    //PROPOSAL -> 11
     function DAOtransferEther(uint _idproposal) public nonReentrant {
         require(balanceOf(msg.sender) > 0, "Not a member of the DAO");
         require(proposalEnded[_idproposal] == true || proposals[_idproposal].timeend <= block.timestamp, "Proposal not ended"); 
         require(proposalPassed[_idproposal] == true, "Proposal not passed");    
         require(proposalExecuted[_idproposal] == false, "Already paid"); 
-        require(proposals[_idproposal].typeproposal == 10, "Wrong function");
+        require(proposals[_idproposal].typeproposal == 11, "Wrong function");
 
         (bool os, ) = payable(proposals[_idproposal].to).call{value: proposals[_idproposal].value}('');
         require(os);
