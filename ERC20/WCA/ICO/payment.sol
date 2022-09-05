@@ -29,7 +29,6 @@ contract tx_mapping is Ownable{
     mapping(address => tx_stored) public stored;
     mapping(address => wallet_data) public wallet;
 
-    mapping(address => uint) private quantity;
     mapping (address => bool) public registered;
 
     address[] private _client;
