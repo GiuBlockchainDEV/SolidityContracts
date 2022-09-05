@@ -9,24 +9,23 @@ import "./string.sol";
 contract tx_mapping is Ownable{
 
     struct all_tx {
-
         uint256 id_tx;
         address address_wallet; //address del wallet
         string hash_tx;         //hash delle transazione
         string blockchain_id;   //blockchain della transazione
         string amount;          //importi inviato
         string token_id;        //token usato
-        
         }
 
     struct tx_stored {
-        
         uint256 tx_done;
         string hash_tx;         //hash delle transazioni
         string blockchain_id;   //blockchain delle transazioni
         string amount;          //importi inviati
         string token_id;        //token usati
-
+        string usdt_spent;
+        string tx_state;
+        string hash_cnv;
         }
 
     struct wallet_data {
@@ -46,11 +45,9 @@ contract tx_mapping is Ownable{
 
     address[] private _client;
 
-    uint tx_done;
+    uint256 tx_done;
     uint256 id_tx;
-    uint qty_bought;
-    uint qty_left;
-    uint wallet_id;
+    uint256 wallet_id;
 
     string hash_tx_add;
     string blockchain_id_add;
@@ -59,27 +56,10 @@ contract tx_mapping is Ownable{
 
     uint public total_tx;
     uint public total_wallet;
-
-    all_tx []data;
-
-//--
-//    function tx_reg(uint256 _id_tx, address _address_wallet, string memory _hashtx, string memory _blockchain_id, string memory _amount, string memory _token_id) public onlyOwner {
-//	    all_tx memory e = all_tx(_id_tx, _address_wallet, _hashtx, _blockchain_id, _amount, _token_id); 
-//  	    data.push(e);}
-//--
-//    function get_tx(uint _tx_id) public view returns(address, string memory, string memory, string memory, string memory) {
-//	    uint i;
-//	    for(i=0;i<data.length;i++){
-//  		    all_tx memory e = data[i];
-//  		    if(e.id_tx == _tx_id){
-//    			return(e.address_wallet, e.hash_tx, e.blockchain_id, e.amount, e.token_id);}}}
     
     function purchase(address _address_wallet, string memory _hash_tx, string memory _blockchain_id, string memory _amount, string memory _token_id) public onlyOwner {
- 
-
         id_tx += 1;
         total_tx = id_tx;
-//        tx_reg(id_tx, _address_wallet, _hash_tx, _blockchain_id, _amount, _token_id);
         store_tx(_address_wallet, _hash_tx, _blockchain_id, _amount, _token_id);
 
         if(registered[_address_wallet] == false){
@@ -104,14 +84,16 @@ contract tx_mapping is Ownable{
             token_id_add = stored[_address_wallet].token_id;
 
 
-            stored[_address_wallet].hash_tx = string(abi.encodePacked(hash_tx_add, ";", _hash_tx));
-            stored[_address_wallet].blockchain_id = string(abi.encodePacked(blockchain_id_add, ";", _blockchain_id));
-            stored[_address_wallet].amount = string(abi.encodePacked(amount_add, ";", _amount));
-            stored[_address_wallet].token_id = string(abi.encodePacked(token_id_add, ";", _token_id));
-            
-            }}
+            stored[_address_wallet].hash_tx = string(abi.encodePacked(hash_tx_add, "/", _hash_tx));
+            stored[_address_wallet].blockchain_id = string(abi.encodePacked(blockchain_id_add, "/", _blockchain_id));
+            stored[_address_wallet].amount = string(abi.encodePacked(amount_add, "/", _amount));
+            stored[_address_wallet].token_id = string(abi.encodePacked(token_id_add, "/", _token_id));}}
 
- //--       
+    function update_tx(address _address_wallet, string memory _usdt_spent, string memory _tx_state, string memory _hash_cnv) public onlyOwner() {
+        stored[_address_wallet].usdt_spent = _usdt_spent;
+        stored[_address_wallet].tx_state = _tx_state;
+        stored[_address_wallet].hash_cnv = _hash_cnv;}
+      
     function register_addr(address _address_wallet) public onlyOwner() {
         require(!registered[_address_wallet], "Account is already registered");
 
@@ -119,15 +101,10 @@ contract tx_mapping is Ownable{
         total_wallet += 1;
         wallet[_address_wallet].wallet_id = total_wallet;}
 
-//--
     function update_addr(address _address_wallet, uint8 _kyc_state, uint256 _tx_done, uint256 _usdt_spent, string memory _last_update) public onlyOwner() {
         require(registered[_address_wallet], "Account is not registered");
 
         wallet[_address_wallet].kyc_state = _kyc_state;
         wallet[_address_wallet].tx_done = _tx_done;
         wallet[_address_wallet].usdt_spent = _usdt_spent;
-        wallet[_address_wallet].last_update = _last_update;}
-        
-        
-        
-        }
+        wallet[_address_wallet].last_update = _last_update;}}
