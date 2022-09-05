@@ -7,16 +7,7 @@ import "./ownable.sol";
 import "./string.sol";
 
 contract tx_mapping is Ownable{
-
-    struct all_tx {
-        uint256 id_tx;
-        address address_wallet; //address del wallet
-        string hash_tx;         //hash delle transazione
-        string blockchain_id;   //blockchain della transazione
-        string amount;          //importi inviato
-        string token_id;        //token usato
-        }
-
+    
     struct tx_stored {
         uint256 tx_done;
         string hash_tx;         //hash delle transazioni
@@ -26,10 +17,10 @@ contract tx_mapping is Ownable{
         string usdt_spent;
         string tx_state;
         string hash_cnv;
+        string id_db;
         }
 
     struct wallet_data {
-
         uint256 wallet_id;
         uint8 kyc_state;         //stato del kyc 0 non effettuato 1 passato 2 non passato
         uint256 tx_done;
@@ -89,10 +80,11 @@ contract tx_mapping is Ownable{
             stored[_address_wallet].amount = string(abi.encodePacked(amount_add, "/", _amount));
             stored[_address_wallet].token_id = string(abi.encodePacked(token_id_add, "/", _token_id));}}
 
-    function update_tx(address _address_wallet, string memory _usdt_spent, string memory _tx_state, string memory _hash_cnv) public onlyOwner() {
+    function update_tx(address _address_wallet, string memory _usdt_spent, string memory _tx_state, string memory _hash_cnv, string memory _id_db) public onlyOwner() {
         stored[_address_wallet].usdt_spent = _usdt_spent;
         stored[_address_wallet].tx_state = _tx_state;
-        stored[_address_wallet].hash_cnv = _hash_cnv;}
+        stored[_address_wallet].hash_cnv = _hash_cnv;
+        stored[_address_wallet].id_db = _id_db;}
       
     function register_addr(address _address_wallet) public onlyOwner() {
         require(!registered[_address_wallet], "Account is already registered");
