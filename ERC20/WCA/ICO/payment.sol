@@ -22,7 +22,7 @@ contract tx_mapping is Ownable{
 
     struct wallet_data {
         uint256 wallet_id;
-        uint8 kyc_state;         //stato del kyc 0 non effettuato 1 passato 2 non passato
+        uint8 kyc_state;         //stato del kyc 0 non effettuato 1 pending 2 passed 3 not passed
         uint256 tx_done;
         uint256 usdt_spent;
         string last_update;
