@@ -17,16 +17,14 @@ contract tx_mapping is Ownable{
         string usdt_spent;
         string tx_state;
         string hash_cnv;
-        string id_db;
-        }
+        string id_db;}
 
     struct wallet_data {
         uint256 wallet_id;
         uint8 kyc_state;         //stato del kyc 0 non effettuato 1 pending 2 passed 3 not passed
         uint256 tx_done;
         uint256 usdt_spent;
-        string last_update;
-    }
+        string last_update;}
 
     mapping(address => tx_stored) public stored;
     mapping(address => wallet_data) public wallet;
@@ -61,19 +59,16 @@ contract tx_mapping is Ownable{
         stored[_address_wallet].tx_done += 1;
 
         if(tx_done == 0){
-
             stored[_address_wallet].hash_tx = _hash_tx;
             stored[_address_wallet].blockchain_id = _blockchain_id;
             stored[_address_wallet].amount = _amount;
             stored[_address_wallet].token_id = _token_id;}
 
         if(tx_done > 0){
-
             hash_tx_add = stored[_address_wallet].hash_tx;
             blockchain_id_add = stored[_address_wallet].blockchain_id;
             amount_add = stored[_address_wallet].amount;
             token_id_add = stored[_address_wallet].token_id;
-
 
             stored[_address_wallet].hash_tx = string(abi.encodePacked(hash_tx_add, "/", _hash_tx));
             stored[_address_wallet].blockchain_id = string(abi.encodePacked(blockchain_id_add, "/", _blockchain_id));
