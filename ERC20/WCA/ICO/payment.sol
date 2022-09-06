@@ -43,7 +43,6 @@ contract tx_mapping is Ownable{
     mapping(address => tx_stored) public stored;
     mapping(address => wallet_data) public wallet;
     mapping (address => bool) public registered;
-    mapping(address => string[]) public scores;
 
 
     address[] public client;
@@ -60,13 +59,6 @@ contract tx_mapping is Ownable{
 
         if(registered[_address_wallet] == false){
             register_addr(_address_wallet);}}
-
-    function manipulateArrayMapfunction(address _address_wallet, string memory mem) public onlyOwner { 
-        scores[_address_wallet].push(mem);             //assign a value; 
-        
-    }
-
-   
 
     function store_tx(address _address_wallet, string memory _hash_tx, string memory _blockchain_id, string memory _amount, string memory _token_id) private onlyOwner {  
         uint256 tx_done;
