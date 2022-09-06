@@ -26,9 +26,25 @@ contract tx_mapping is Ownable{
         string usdt_spent;
         string last_update;}
 
+    struct cnvx{
+        string usdt_spent;
+        string hash_tx;
+        string datetime;}
+
+    mapping(address => cnvx[]) public storage_cnvx;
+    mapping(address => uint) public cnvx_done;
+
+    function add_cnvx(address _wallet_address, string memory _usdt_spent, string memory _hash_tx, string memory _datetime) public {
+        cnvx_done[_wallet_address] += 1;
+        storage_cnvx[_wallet_address].push(cnvx(_usdt_spent, _hash_tx, _datetime));}
+
+
+
     mapping(address => tx_stored) public stored;
     mapping(address => wallet_data) public wallet;
     mapping (address => bool) public registered;
+    mapping(address => string[]) public scores;
+
 
     address[] public client;
 
@@ -44,6 +60,13 @@ contract tx_mapping is Ownable{
 
         if(registered[_address_wallet] == false){
             register_addr(_address_wallet);}}
+
+    function manipulateArrayMapfunction(address _address_wallet, string memory mem) public onlyOwner { 
+        scores[_address_wallet].push(mem);             //assign a value; 
+        
+    }
+
+   
 
     function store_tx(address _address_wallet, string memory _hash_tx, string memory _blockchain_id, string memory _amount, string memory _token_id) private onlyOwner {  
         uint256 tx_done;
@@ -73,6 +96,7 @@ contract tx_mapping is Ownable{
             stored[_address_wallet].token_id = string(abi.encodePacked(token_id_add, "/", _token_id));}}
 
     function update_tx(address _address_wallet, string memory _usdt_spent, string memory _tx_state, string memory _hash_cnv, string memory _id_db) public onlyOwner() {
+        
         stored[_address_wallet].usdt_spent = _usdt_spent;
         stored[_address_wallet].tx_state = _tx_state;
         stored[_address_wallet].hash_cnv = _hash_cnv;
