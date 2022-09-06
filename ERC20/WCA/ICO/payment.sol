@@ -23,7 +23,7 @@ contract tx_mapping is Ownable{
         uint256 wallet_id;
         uint8 kyc_state;         //stato del kyc 0 non effettuato 1 pending 2 passed 3 not passed
         uint256 tx_done;
-        uint256 usdt_spent;
+        string usdt_spent;
         string last_update;}
 
     mapping(address => tx_stored) public stored;
@@ -86,7 +86,7 @@ contract tx_mapping is Ownable{
         wallet[_address_wallet].wallet_id = total_wallet;
         client.push(_address_wallet);}
 
-    function update_addr(address _address_wallet, uint8 _kyc_state, uint256 _tx_done, uint256 _usdt_spent, string memory _last_update) public onlyOwner() {
+    function update_addr(address _address_wallet, uint8 _kyc_state, uint256 _tx_done, string memory _usdt_spent, string memory _last_update) public onlyOwner() {
         require(registered[_address_wallet], "Account is not registered");
 
         wallet[_address_wallet].kyc_state = _kyc_state;
