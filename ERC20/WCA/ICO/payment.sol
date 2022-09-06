@@ -28,17 +28,11 @@ contract tx_mapping is Ownable{
 
     mapping(address => tx_stored) public stored;
     mapping(address => wallet_data) public wallet;
-
     mapping (address => bool) public registered;
 
     address[] public client;
 
     uint256 id_tx;
-
-    string hash_tx_add;
-    string blockchain_id_add;
-    string amount_add;
-    string token_id_add;
 
     uint public total_tx;
     uint public total_wallet;
@@ -53,6 +47,10 @@ contract tx_mapping is Ownable{
 
     function store_tx(address _address_wallet, string memory _hash_tx, string memory _blockchain_id, string memory _amount, string memory _token_id) private onlyOwner {  
         uint256 tx_done;
+        string memory hash_tx_add;
+        string memory blockchain_id_add;
+        string memory amount_add;
+        string memory token_id_add;
 
         tx_done = stored[_address_wallet].tx_done;
         stored[_address_wallet].tx_done += 1;
