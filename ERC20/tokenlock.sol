@@ -1,5 +1,11 @@
 pragma solidity ^0.6.0;
 
+# In questo contratto, viene definito un contratto TokenLock che fa riferimento a un contratto Token esistente. 
+# Il contratto TokenLock offre due funzioni: lock() per bloccare i token per un determinato periodo di tempo, e unlock() per sbloccare i token 
+# quando il periodo di blocco è scaduto.
+# Per utilizzare il contratto, è necessario fornire l'indirizzo del contratto Token esistente al momento della creazione del contratto TokenLock. 
+# In seguito, gli utenti possono utilizzare le funzioni lock() e unlock() per bloccare e sbloccare i token come desiderato.
+
 interface IERC20 {
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
