@@ -247,3 +247,4 @@ contract ERC721A is IERC721A {
             ptr := sub(ptr, 32)
             mstore(ptr, length)}}}
 
+
