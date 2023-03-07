@@ -1,7 +1,6 @@
-// SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts (last updated v4.7.0) (token/ERC20/utils/SafeERC20.sol)
+// SPDX-License-Identifier: GPL-3.0
 
-pragma solidity ^0.8.16;
+pragma solidity ^0.8.19;
 
 interface NewIERC20 {
     function transfer(address, uint) external returns (bool);}
