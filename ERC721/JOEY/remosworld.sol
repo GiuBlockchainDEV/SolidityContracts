@@ -15,6 +15,7 @@ contract remosworld is ERC721A, Ownable, ReentrancyGuard {
     uint256 public contractState = 0;
     bool public revealed = false;
 
+    mapping (address => bool) public proofed;
     mapping (address => uint) public whitelisted;
     mapping(address => uint) public minted;
 
@@ -148,5 +149,12 @@ contract remosworld is ERC721A, Ownable, ReentrancyGuard {
         old_type_IERC20(_tokenAddr).transfer(_to, _amount);}
         
     function withdrawEther() public onlyOwner nonReentrant {
-        (bool os, ) = payable(owner()).call{value: address(treasuryWallet).balance}('');
-        require(os);}}
+        (bool os, ) = payable(owner()).call{value: address(this).balance}('');
+        require(os);}
+        
+    function whitelistBatch(address[] memory rec) public  { 
+  
+    for(uint i =0; i< rec.length; i++){  
+      proofed[rec[i]] = true;}
+   
+ }}
