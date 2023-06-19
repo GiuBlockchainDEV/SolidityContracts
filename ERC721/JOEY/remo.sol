@@ -19,7 +19,7 @@ contract remosworld is ERC721A, Ownable, ReentrancyGuard {
     mapping (address => uint) public whitelisted;
     mapping(address => uint) public minted;
 
-    string public tokenName = "REMOS WOLRD";
+    string public tokenName = "REMOS WORLD";
     string public tokenSymbol = "REMO";
     uint256 public mintedNFT;
     uint256 public maxSupply = 500;
