@@ -25,7 +25,7 @@ contract remosworld is ERC721A, Ownable, ReentrancyGuard {
     uint256 public maxSupply = 500;
     uint256 public maxWalletAmount = 1;
     uint256 public priceNFT = 0.085 ether;
-    string public hiddenMetadataUri = "ipfs://QmSmo5bYtZDKrQQdXwobAXwbBUVFUU9DE7AgxCuSUHiCLe.json";
+    string public hiddenMetadataUri = "ipfs://QmSmo5bYtZDKrQQdXwobAXwbBUVFUU9DE7AgxCuSUHiCLe";
     
     constructor() ERC721A(tokenName, tokenSymbol) {}
 
