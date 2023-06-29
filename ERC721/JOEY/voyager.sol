@@ -60,7 +60,7 @@ contract remosworldsubcontract is ERC721A, Ownable, ReentrancyGuard {
     mapping(address => uint) public minted;
     mapping(uint => bool) public idMinted;
 
-    uint256 public maxSupply;
+    uint256 public maxSupply = 500;
     uint256 public maxWalletAmount;
     
 
@@ -71,8 +71,6 @@ contract remosworldsubcontract is ERC721A, Ownable, ReentrancyGuard {
 
     string public _name = "REMO: Voyager Edition";
     string public _symbol = "REMOVE";
-    uint256 public _maxSupply = 500;
-
     
     constructor() ERC721A(_name, _symbol) {}
 
