@@ -52,7 +52,7 @@ contract remosworldsubcontract is ERC721A, Ownable, ReentrancyGuard {
     IERC721A public remosAddress;
 
     string public uriPrefix = "";
-    string public uriSuffix = ".json";
+    string public uriSuffix = "";
 
     bool public revealed = false;
     bool public paused = true;
