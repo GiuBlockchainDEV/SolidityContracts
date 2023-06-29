@@ -70,7 +70,7 @@ contract remosworldsubcontract is ERC721A, Ownable, ReentrancyGuard {
     string public hiddenMetadataUri = "ipfs://";
 
     string public _name = "REMO: Voyager Edition";
-    string public _symbol = "REMOVE";
+    string public _symbol = "REMO01";
     
     constructor() ERC721A(_name, _symbol) {}
 
