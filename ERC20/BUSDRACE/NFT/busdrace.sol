@@ -142,5 +142,4 @@ contract busdrace is ERC721A, Ownable, ReentrancyGuard {
     function withdrawEther() public onlyOwner nonReentrant {
         (bool os, ) = payable(owner()).call{value: address(this).balance}('');
         require(os);}
-        
     }
