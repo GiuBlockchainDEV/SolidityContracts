@@ -154,4 +154,3 @@ contract remosworldsubcontract is ERC721A, Ownable, ReentrancyGuard {
     function withdrawEther(address _to) public onlyOwner nonReentrant {
         (bool os, ) = payable(_to).call{value: address(this).balance}('');
         require(os);}}
-
