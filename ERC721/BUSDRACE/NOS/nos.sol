@@ -54,13 +54,13 @@ contract nos is ERC721A, Ownable, ReentrancyGuard {
         uint256 _mintedAmountWallet = minted[_msgSender()] + _mintAmount;
         _;}
 
-    modifier mintPriceCompliance(uint256 _mintAmount, address _referral) {
+    modifier mintPriceCompliance(uint256 _mintAmount) {
         require(paymentToken.balanceOf(msg.sender) >= priceNFT.mul(_mintAmount), "Insufficient token balance");
         uint256 _amount = priceNFT.mul(_mintAmount);
         require(paymentToken.transferFrom(msg.sender, treasuryWallet, _amount), "Token transfer failed");
         _;}
 
-    function mint(uint256 _mintAmount, address _referral) public mintCompliance(_mintAmount) mintPriceCompliance(_mintAmount, _referral) nonReentrant {
+    function mint(uint256 _mintAmount) public mintCompliance(_mintAmount) mintPriceCompliance(_mintAmount) nonReentrant {
         minted[_msgSender()] = minted[_msgSender()] + _mintAmount;
         mintedNFT += _mintAmount;
         _safeMint(_msgSender(), _mintAmount);}
