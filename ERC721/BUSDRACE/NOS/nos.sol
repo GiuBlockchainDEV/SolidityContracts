@@ -48,7 +48,7 @@ contract nos is ERC721A, Ownable, ReentrancyGuard {
         treasuryWallet = _to;}
 
     modifier mintCompliance(uint256 _mintAmount) {
-        require(paused == true, "Mint Disactivated!");
+        require(paused == false, "Mint Disactivated!");
         require(_mintAmount > 0, "Invalid mint amount!");
         require(totalSupply() + _mintAmount <= maxSupply, "Max supply exceeded");
         uint256 _mintedAmountWallet = minted[_msgSender()] + _mintAmount;
