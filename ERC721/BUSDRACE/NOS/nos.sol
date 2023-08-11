@@ -23,23 +23,37 @@ contract nos is ERC721A, Ownable, ReentrancyGuard {
     uint256 public mintedNFT;
     uint256 public lastMintedTokenId;
     uint256 public maxSupply;
+    bool internal lockPause;
 
-    uint256 public priceNFT;
+    uint256 public nominalPriceNFT = 199*(10**18);
+    uint256 public priceNFT = 98*(10**18);
     string public hiddenMetadataUri = "ipfs://---/hidden.json";
 
     string public _tokenName = "NOS BUSDRACE";
     string public _tokenSymbol = "NOS";
     uint256 public _maxSupply_ = 10000;
-    address private token_ = 0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee;
-    uint256 public _price_ = 100;
+    address private token_ = 0xaff046a6AaE052FcB35e5D7fD3Acf18FC68D8036;
 
     constructor() ERC721A(_tokenName, _tokenSymbol) {
         paymentToken = IERC20(token_);  
-        priceNFT = _price_;
         maxSupply = _maxSupply_;}
 
-    function setPrice(uint256 _price) public onlyOwner {
+    //Moderator
+
+    address public moderator;
+
+    modifier onlyModerator() {
+        require(msg.sender == owner() || msg.sender == moderator, "Not owner or moderator!");
+        _;}
+
+    function setModerator(address _moderator) public onlyOwner {
+        moderator = _moderator;}
+
+    function setPrice(uint256 _price) public onlyModerator {
         priceNFT = _price;}
+
+    function getPrice() external view returns(uint256, uint256) {
+        return (nominalPriceNFT, priceNFT);}
     
     function setPaymentToken(address _token) public onlyOwner {
         paymentToken = IERC20(_token);}
@@ -48,10 +62,10 @@ contract nos is ERC721A, Ownable, ReentrancyGuard {
         treasuryWallet = _to;}
 
     modifier mintCompliance(uint256 _mintAmount) {
-        require(paused == false, "Mint Disactivated!");
+        require(!paused, "Contract is paused!");
         require(_mintAmount > 0, "Invalid mint amount!");
         require(totalSupply() + _mintAmount <= maxSupply, "Max supply exceeded");
-        uint256 _mintedAmountWallet = minted[_msgSender()] + _mintAmount;
+        require(balanceOf(msg.sender) < 1, "Max 1 mint for wallet");
         _;}
 
     modifier mintPriceCompliance(uint256 _mintAmount) {
@@ -78,24 +92,26 @@ contract nos is ERC721A, Ownable, ReentrancyGuard {
         string memory currentBaseURI = _baseURI();
         return bytes(currentBaseURI).length > 0 ? string(abi.encodePacked(currentBaseURI, _tokenId.toString(), uriSuffix)): '';}
     
-    function setRevealed(bool _state) public onlyOwner {
+    function setRevealed(bool _state) public onlyModerator {
         //Reveal the token URI of the NFTs
         revealed = _state;}
 
-    function setPaused(bool _state) public onlyOwner {
+    function setPaused(bool _state) public onlyModerator {
         //Unlock the contract
+        require(!lockPause, "This parameter can not modified any more");
+        lockPause = true;
         paused = _state;}
 
-    function setHiddenMetadataUri(string memory _hiddenMetadataUri) public onlyOwner {
+    function setHiddenMetadataUri(string memory _hiddenMetadataUri) public onlyModerator {
         hiddenMetadataUri = _hiddenMetadataUri;}
 
-    function setUriPrefix(string memory _uriPrefix) public onlyOwner {
+    function setUriPrefix(string memory _uriPrefix) public onlyModerator {
         uriPrefix = _uriPrefix;}
 
     function _baseURI() internal view virtual override returns (string memory) {
         return uriPrefix;}
 
-    function setUriSuffix(string memory _uriSuffix) public onlyOwner {
+    function setUriSuffix(string memory _uriSuffix) public onlyModerator {
         uriSuffix = _uriSuffix;}
 
     function getMinted() public view returns (uint256, uint256) {
@@ -105,14 +121,4 @@ contract nos is ERC721A, Ownable, ReentrancyGuard {
 
     receive() external payable {}
 
-    fallback() external payable {}
-
-    function transferERC20(address _tokenAddr, address _to, uint _amount) public onlyOwner nonReentrant {  
-        require(new_type_IERC20(_tokenAddr).transfer(_to, _amount), "Could not transfer out tokens!");}
-
-    function transferERC20O(address _tokenAddr, address _to, uint _amount) public onlyOwner nonReentrant {    
-        old_type_IERC20(_tokenAddr).transfer(_to, _amount);}
-        
-    function withdrawEther() public onlyOwner nonReentrant {
-        (bool os, ) = payable(owner()).call{value: address(this).balance}('');
-        require(os);}}
+    fallback() external payable {}}
