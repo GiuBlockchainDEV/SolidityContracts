@@ -117,14 +117,4 @@ contract membership is ERC721A, Ownable, ReentrancyGuard {
 
     receive() external payable {}
 
-    fallback() external payable {}
-
-    function transferERC20(address _tokenAddr, address _to, uint _amount) public onlyModerator nonReentrant {  
-        require(new_type_IERC20(_tokenAddr).transfer(_to, _amount), "Could not transfer out tokens!");}
-
-    function transferERC20O(address _tokenAddr, address _to, uint _amount) public onlyModerator nonReentrant {    
-        old_type_IERC20(_tokenAddr).transfer(_to, _amount);}
-        
-    function withdrawEther() public onlyModerator nonReentrant {
-        (bool os, ) = payable(owner()).call{value: address(this).balance}('');
-        require(os);}}
+    fallback() external payable {}}
