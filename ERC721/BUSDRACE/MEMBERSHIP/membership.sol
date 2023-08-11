@@ -24,13 +24,13 @@ contract membership is ERC721A, Ownable, ReentrancyGuard {
     uint256 public lastMintedTokenId;
     uint256 public maxSupply;
 
-    uint256 public priceNFT = 100*(10^18);
+    uint256 public priceNFT = 100*(10**18);
     string public hiddenMetadataUri = "ipfs://---/hidden.json";
 
     string public _tokenName = "Membership NFT";
     string public _tokenSymbol = "MNFT";
     uint256 public _maxSupply_ = 10000;
-    address private token_ = 0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee;
+    address private token_ = 0xaff046a6AaE052FcB35e5D7fD3Acf18FC68D8036;
 
     constructor() ERC721A(_tokenName, _tokenSymbol) {
         paymentToken = IERC20(token_);  
