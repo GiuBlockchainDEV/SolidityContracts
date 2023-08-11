@@ -24,7 +24,8 @@ contract membership is ERC721A, Ownable, ReentrancyGuard {
     uint256 public lastMintedTokenId;
     uint256 public maxSupply;
 
-    uint256 public priceNFT = 100*(10**18);
+    uint256 public nominalPriceNFT = 99*(10**18);
+    uint256 public priceNFT = 98*(10**18);
     string public hiddenMetadataUri = "ipfs://---/hidden.json";
 
     string public _tokenName = "Membership NFT";
@@ -50,8 +51,8 @@ contract membership is ERC721A, Ownable, ReentrancyGuard {
     function setPrice(uint256 _price) external onlyModerator {
         priceNFT = _price;}
 
-    function getPrice() external view returns(uint256) {
-        return priceNFT;
+    function getPrice() external view returns(uint256, uint256) {
+        return (nominalPriceNFT, priceNFT);
     }
     
     function setPaymentToken(address _token) external onlyModerator {
