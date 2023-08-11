@@ -64,7 +64,6 @@ contract membership is ERC721A, Ownable, ReentrancyGuard {
         require(!paused, "Contract is paused!");
         require(_mintAmount > 0, "Invalid mint amount!");
         require(totalSupply() + _mintAmount <= maxSupply, "Max supply exceeded");
-        uint256 _mintedAmountWallet = minted[_msgSender()] + _mintAmount;
         _;}
 
     modifier mintPriceCompliance(uint256 _mintAmount) {
