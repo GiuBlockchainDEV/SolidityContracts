@@ -194,9 +194,3 @@ interface IERC20 {
 
 interface ERC721A__IERC721Receiver {
     function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data) external returns (bytes4);}
-
-interface new_type_IERC20 {
-    function transfer(address, uint) external returns (bool);}
-
-interface old_type_IERC20 {
-    function transfer(address, uint) external;}
