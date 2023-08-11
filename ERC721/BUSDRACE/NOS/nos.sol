@@ -122,3 +122,4 @@ contract nos is ERC721A, Ownable, ReentrancyGuard {
     receive() external payable {}
 
     fallback() external payable {}}
+
