@@ -11,7 +11,7 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
     struct stakingInfo {
         bool staked;
         uint256 tokenValue;
-        uint256 whitdrawableValue;
+        uint256 valueWithdrawn;
         uint256 stakingTimestamp;
         bool boosted;
         uint256 stakingBoostTimestamp;}
@@ -102,19 +102,22 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
         ownedTokens[_caller][contractAddress].push(tokenId);
         return true;}
         
-    function getValueWithdrable() public pure returns (uint256) {
-        return 1;}
+    function getValueWithdrable(address _collection, uint256 _tokenId) public view returns (uint256) {
+            uint256 _nominalValue = stakingData[msg.sender][_collection][_tokenId].tokenValue;
+            uint256 _halfNominalValue = _nominalValue.mul(50).div(100);
+            uint256 _valueWhitdrawn = stakingData[msg.sender][_collection][_tokenId].valueWithdrawn;
+            uint256 _amount = 0;
+            if(_valueWhitdrawn > _halfNominalValue){
+                _amount = _nominalValue - _valueWhitdrawn;}
+            else{
+                _amount = _halfNominalValue;}
+        return _amount;}
 
     function unstakeNFT(address _collection, uint256 _tokenId) external {
         IERC721A _nftCollection = IERC721A(_collection);
-        bool isInStake = false;
-        for (uint256 i = 0; i < ownedTokens[msg.sender][_collection].length; i++) {
-            if (ownedTokens[msg.sender][_collection][i] == _tokenId) {
-                isInStake = true;
-                break;}}
-        require(isInStake, "Token non in stake");
-        //uint256 _amount = 100;
-        //require(paymentToken.transfer(msg.sender, _amount.mul(90).div(100)) && paymentToken.transfer(devWallet, _amount.mul(10).div(100)) , "Token transfer failed!");
+        require(stakingData[msg.sender][_collection][_tokenId].staked, "Token not staked");
+        uint256 amountWhitdrable = getValueWithdrable(_collection, _tokenId);
+        require(paymentToken.transfer(msg.sender, amountWhitdrable.mul(90).div(100)) && paymentToken.transfer(devWallet, amountWhitdrable.mul(10).div(100)) , "Token transfer failed!");
         require(removeToken(_collection, _tokenId), "ID not removed");
         _nftCollection.safeTransferFrom(address(this), msg.sender, _tokenId);}
 
@@ -183,13 +186,15 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
         uint256 _nominalValue = stakingData[msg.sender][_contractAddress][_tokenId].tokenValue;
         uint256 nftStaked = stakingData[msg.sender][_contractAddress][_tokenId].stakingTimestamp;
         uint256 _valueCompund = getAccumulation(_nominalValue, nftStaked, rewardsPerMinutes);
-        uint256 nosStaked = stakingData[msg.sender][_contractAddress][_tokenId].stakingBoostTimestamp;
+        bool nosStaked = stakingData[msg.sender][_contractAddress][_tokenId].boosted;
+        uint256 nosTimestamp = stakingData[msg.sender][_contractAddress][_tokenId].stakingBoostTimestamp;
         uint256 _valueCompundByNos = 0;
-        if(nosStaked != 0){
-            _valueCompundByNos = getAccumulation(_nominalValue, nosStaked, additionalRewards);}
+        if(nosStaked == true){
+            _valueCompundByNos = getAccumulation(_nominalValue, nosTimestamp, additionalRewards);}
         stakingData[msg.sender][_contractAddress][_tokenId].tokenValue = _nominalValue + _valueCompund + _valueCompundByNos;
         stakingData[msg.sender][_contractAddress][_tokenId].stakingTimestamp = block.timestamp;
-        stakingData[msg.sender][_contractAddress][_tokenId].stakingBoostTimestamp = block.timestamp;
+        if(nosStaked == true){
+            stakingData[msg.sender][_contractAddress][_tokenId].stakingBoostTimestamp = block.timestamp;}
         return true;}
 
     function getMinuteElapsed(uint256 _stakingTimestamp) public view returns (uint256) {
@@ -209,17 +214,21 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
     function claimRewards(address _contractAddress, uint256 _tokenId) external nonReentrant {
         require(stakingData[msg.sender][_contractAddress][_tokenId].staked, "NFT not staked");
         uint256 _nominalValue = stakingData[msg.sender][_contractAddress][_tokenId].tokenValue;
+        uint256 _valueWhitdrawn = stakingData[msg.sender][_contractAddress][_tokenId].valueWithdrawn;
         uint256 nftStaked = stakingData[msg.sender][_contractAddress][_tokenId].stakingTimestamp;
         uint256 _value = getAccumulation(_nominalValue, nftStaked, rewardsPerMinutes);
-        uint256 nosStaked = stakingData[msg.sender][_contractAddress][_tokenId].stakingBoostTimestamp;
+        uint256 nosTimestamp = stakingData[msg.sender][_contractAddress][_tokenId].stakingBoostTimestamp;
+        bool nosStaked = stakingData[msg.sender][_contractAddress][_tokenId].boosted;
         uint256 _valueByNos = 0;
-        if(nosStaked != 0){
-            _valueByNos = getAccumulation(_nominalValue, nosStaked, additionalRewards);}
+        if(nosStaked == true){
+            _valueByNos = getAccumulation(_nominalValue, nosTimestamp, additionalRewards);}
         uint256 _amount = _value + _valueByNos;
         require(_amount > 0, "No tokens to claim!");
         require(paymentToken.transfer(msg.sender, _amount.mul(90).div(100)) && paymentToken.transfer(devWallet, _amount.mul(10).div(100)) , "Token transfer failed!");
+        stakingData[msg.sender][_contractAddress][_tokenId].valueWithdrawn = _valueWhitdrawn + _amount;
         stakingData[msg.sender][_contractAddress][_tokenId].stakingTimestamp = block.timestamp;
-        stakingData[msg.sender][_contractAddress][_tokenId].stakingBoostTimestamp = block.timestamp;}
+        if(nosStaked == true){
+            stakingData[msg.sender][_contractAddress][_tokenId].stakingBoostTimestamp = block.timestamp;}}
         
     //Manage Transfer
 
