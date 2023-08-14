@@ -189,23 +189,14 @@ interface IERC20 {
      *
      * Emits a {Transfer} event.
      */
-    function transferFrom(address from, address to, uint256 value) external returns (bool);
-}
+    function transferFrom(address from, address to, uint256 value) external returns (bool);}
 
 interface IContract {
-    function tokenId(uint256) external view returns (address buyer, uint256 amountPaid);
-}
-
-interface new_type_IERC20 {
-    function transfer(address, uint) external returns (bool);}
-
-interface old_type_IERC20 {
-    function transfer(address, uint) external;}
+    function tokenId(uint256) external view returns (address buyer, uint256 amountPaid);}
 
 interface ERC721A__IERC721Receiver {
     function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data) external returns (bytes4);}
 
 contract ERC721Holder is ERC721A__IERC721Receiver {
     function onERC721Received(address, address, uint256, bytes calldata) public pure returns(bytes4) {
-        return this.onERC721Received.selector;}
-}
+        return this.onERC721Received.selector;}}
