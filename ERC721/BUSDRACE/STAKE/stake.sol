@@ -8,6 +8,10 @@ import "./library.sol";
 contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
     using SafeMath for uint256;
 
+    struct boostInfo{
+        bool boosted;
+        uint256 boostId;}
+
     struct stakingInfo {
         bool staked;
         uint256 tokenValue;
@@ -16,9 +20,8 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
         bool boosted;
         uint256 stakingBoostTimestamp;}
     
-    mapping(address => bool) public boosted;
+    mapping(address => boostInfo) public boostData;
     mapping(address => mapping(address => mapping(uint256 => stakingInfo))) public stakingData;
-
     mapping(address => address[]) public addedContracts;
     mapping(address => mapping (address => uint256[])) public ownedTokens;
 
@@ -26,7 +29,7 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
 
     address public devWallet;
 
-    function setAddress(address _devWallet) public onlyOwner {
+    function setAddress(address _devWallet) external onlyOwner {
         devWallet = _devWallet;}
 
     //Moderator
@@ -37,7 +40,7 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
         require(msg.sender == owner() || msg.sender == moderator, "Not owner or moderator!");
         _;}
 
-    function setModerator(address _moderator) public onlyOwner {
+    function setModerator(address _moderator) external onlyOwner {
         moderator = _moderator;}
 
     //Contract Allowance
@@ -53,12 +56,12 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
         require(isAllowed, "Caller address not allowed!");
         _;}
 
-    function addAllowedContract(address contractAddress) public onlyOwner {
-        allowedContracts.push(contractAddress);}
+    function addAllowedContract(address _contractAddress) public onlyOwner {
+        allowedContracts.push(_contractAddress);}
 
-    function removeAllowedContract(address contractAddress) public onlyOwner {
+    function removeAllowedContract(address _contractAddress) public onlyOwner {
         for (uint256 i = 0; i < allowedContracts.length; i++) {
-            if (allowedContracts[i] == contractAddress) {
+            if (allowedContracts[i] == _contractAddress) {
                 allowedContracts[i] = allowedContracts[allowedContracts.length - 1];
                 allowedContracts.pop();
                 break;}}}
@@ -85,79 +88,91 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
                 return true;}}
         return false;}
 
-    function getPurchaseFromTokenId(IContract _contractAddress, uint256 _tokenId) public view returns (address, uint256) {
-        return _contractAddress.tokenId(_tokenId);}
+    //Staking 
+    uint256 public totalValueLocked;
+    uint256 public totalNFTLocked;
+    //getTotalValueLocked() e getTotalNFTLocked() 
 
     function stakeNFT(address _caller, address _collection, uint256 tokenId, uint256 _nominalValue) external onlyAllowedContracts returns (bool) {
         require(addToken(_caller, _collection, tokenId, _nominalValue), "ID not added");
         return true;}
 
-    function addToken(address _caller, address contractAddress, uint256 tokenId, uint256 _value) internal returns (bool) {
-        require(!isTokenIdAdded(_caller, contractAddress, tokenId), "TokenId already added for this contract.");
-        if(!isContractAdded(_caller, contractAddress)) {
-            addedContracts[_caller].push(contractAddress);}
-        stakingData[_caller][contractAddress][tokenId].staked = true;
-        stakingData[_caller][contractAddress][tokenId].tokenValue = _value;
-        stakingData[_caller][contractAddress][tokenId].stakingTimestamp = block.timestamp;
-        ownedTokens[_caller][contractAddress].push(tokenId);
+    function addToken(address _caller, address _contractAddress, uint256 _tokenId, uint256 _value) internal returns (bool) {
+        require(!isTokenIdAdded(_caller, _contractAddress, _tokenId), "TokenId already added for this contract.");
+        if(!isContractAdded(_caller, _contractAddress)) {
+            addedContracts[_caller].push(_contractAddress);}
+        stakingData[_caller][_contractAddress][_tokenId].staked = true;
+        stakingData[_caller][_contractAddress][_tokenId].tokenValue = _value;
+        stakingData[_caller][_contractAddress][_tokenId].stakingTimestamp = block.timestamp;
+        ownedTokens[_caller][_contractAddress].push(_tokenId);
+        totalValueLocked = totalValueLocked + _value;
+        totalNFTLocked = totalNFTLocked + 1;
         return true;}
         
     function getValueWithdrable(address _collection, uint256 _tokenId) public view returns (uint256) {
-            uint256 _nominalValue = stakingData[msg.sender][_collection][_tokenId].tokenValue;
-            uint256 _halfNominalValue = _nominalValue.mul(50).div(100);
-            uint256 _valueWhitdrawn = stakingData[msg.sender][_collection][_tokenId].valueWithdrawn;
-            uint256 _amount = 0;
-            if(_valueWhitdrawn > _halfNominalValue){
-                _amount = _nominalValue - _valueWhitdrawn;}
-            else{
-                _amount = _halfNominalValue;}
+        uint256 _nominalValue = stakingData[msg.sender][_collection][_tokenId].tokenValue;
+        uint256 _halfNominalValue = _nominalValue.mul(50).div(100);
+        uint256 _valueWhitdrawn = stakingData[msg.sender][_collection][_tokenId].valueWithdrawn;
+        uint256 _amount = 0;
+        if(_valueWhitdrawn > _halfNominalValue){
+            _amount = _nominalValue - _valueWhitdrawn;}
+        else{
+            _amount = _halfNominalValue;}
         return _amount;}
 
     function unstakeNFT(address _collection, uint256 _tokenId) external {
         IERC721A _nftCollection = IERC721A(_collection);
         require(stakingData[msg.sender][_collection][_tokenId].staked, "Token not staked");
         uint256 amountWhitdrable = getValueWithdrable(_collection, _tokenId);
+        require(amountWhitdrable > 0, "No tokens to claim!");
         require(paymentToken.transfer(msg.sender, amountWhitdrable.mul(90).div(100)) && paymentToken.transfer(devWallet, amountWhitdrable.mul(10).div(100)) , "Token transfer failed!");
         require(removeToken(_collection, _tokenId), "ID not removed");
         _nftCollection.safeTransferFrom(address(this), msg.sender, _tokenId);}
 
-    function removeToken(address contractAddress, uint256 tokenId) internal returns (bool) {
+    function removeToken(address _contractAddress, uint256 _tokenId) internal returns (bool) {
         // Verifica che il token sia effettivamente in staking prima di rimuoverlo
-        require(stakingData[msg.sender][contractAddress][tokenId].staked, "Token not staked");
-        stakingData[msg.sender][contractAddress][tokenId].staked = false;
-        stakingData[msg.sender][contractAddress][tokenId].tokenValue = 0;
-        stakingData[msg.sender][contractAddress][tokenId].stakingTimestamp = 0;
+        require(stakingData[msg.sender][_contractAddress][_tokenId].staked, "Token not staked");
+        totalValueLocked = totalValueLocked - stakingData[msg.sender][_contractAddress][_tokenId].tokenValue;
+        totalNFTLocked = totalNFTLocked - 1;
+        stakingData[msg.sender][_contractAddress][_tokenId].staked = false;
+        stakingData[msg.sender][_contractAddress][_tokenId].tokenValue = 0;
+        stakingData[msg.sender][_contractAddress][_tokenId].stakingTimestamp = 0;
+        
         return true;}
 
     //NOS
 
     IERC721A public nosNFT;
 
-    function checkBoost() public view returns (bool) {
-        return boosted[msg.sender];}
+    function checkBoost() public view returns (bool, uint256) {
+        return (boostData[msg.sender].boosted, boostData[msg.sender].boostId);}
 
     function setNosNFT(address _nosNFT) external onlyOwner {
         nosNFT = IERC721A(_nosNFT);}
 
-    function activeBoost() external {
-        require(boosted[msg.sender] = false, "Boost already staked");
-        boosted[msg.sender] = true;
+    function activeBoost(uint256 _tokenId) external {
+        require(boostData[msg.sender].boosted = false, "Boost already staked");
+        nosNFT.safeTransferFrom(msg.sender, address(this), _tokenId);
+        boostData[msg.sender].boosted = true;
+        boostData[msg.sender].boostId = _tokenId;
         for (uint i = 0; i < allowedContracts.length; i++) {
             uint256[] memory tokens = ownedTokens[msg.sender][allowedContracts[i]];
             for(uint e = 0; i < tokens.length; i++) {
                 if(stakingData[msg.sender][allowedContracts[i]][e].stakingBoostTimestamp == 0){
                     stakingData[msg.sender][allowedContracts[i]][e].stakingBoostTimestamp = block.timestamp;}}}}
 
-    function disactiveBoost() external {
-        require(boosted[msg.sender] = true, "Boost not staked");
-        boosted[msg.sender] = false;
+    function disactiveBoost(uint256 _tokenId) external {
+        require(boostData[msg.sender].boosted = true, "Boost not staked");
+        nosNFT.safeTransferFrom(address(this), msg.sender, _tokenId);
+        boostData[msg.sender].boosted = false;
+        boostData[msg.sender].boostId = 0;
         for (uint i = 0; i < allowedContracts.length; i++) {
             uint256[] memory tokens = ownedTokens[msg.sender][allowedContracts[i]];
             for(uint e = 0; i < tokens.length; i++) {
                 stakingData[msg.sender][allowedContracts[i]][e].stakingBoostTimestamp = 0;}}}
     
     function updateBoost() external {
-        require(boosted[msg.sender] = true, "Boost not staked");
+        require(boostData[msg.sender].boosted = true, "Boost not staked");
         for (uint i = 0; i < allowedContracts.length; i++) {
             uint256[] memory tokens = ownedTokens[msg.sender][allowedContracts[i]];
             for(uint e = 0; i < tokens.length; i++) {
@@ -166,9 +181,6 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
 
     function getOwnedTokens(address _wallet, address _contractAddress) public view returns (uint256[] memory) {
         return ownedTokens[_wallet][_contractAddress];}
-
-    //Payment Token 
-    //BUSD Testnet 0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee;
 
     IERC20 public paymentToken;
 
@@ -191,43 +203,42 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
         uint256 _valueCompundByNos = 0;
         if(nosStaked == true){
             _valueCompundByNos = getAccumulation(_nominalValue, nosTimestamp, additionalRewards);}
+        totalValueLocked = totalValueLocked + _valueCompund + _valueCompundByNos;
         stakingData[msg.sender][_contractAddress][_tokenId].tokenValue = _nominalValue + _valueCompund + _valueCompundByNos;
         stakingData[msg.sender][_contractAddress][_tokenId].stakingTimestamp = block.timestamp;
         if(nosStaked == true){
             stakingData[msg.sender][_contractAddress][_tokenId].stakingBoostTimestamp = block.timestamp;}
         return true;}
 
-    function getMinuteElapsed(uint256 _stakingTimestamp) public view returns (uint256) {
+    function getMinuteElapsed(uint256 _stakingTimestamp) internal view returns (uint256) {
         uint256 _minutesElapsed = (block.timestamp - _stakingTimestamp).div(60);
         return _minutesElapsed;}
 
-    function getAccumulatedPercentage(uint256 _stakingTimestamp, uint256 _rewardsPerMinutes) public view returns (uint256) {
+    function getAccumulatedPercentage(uint256 _stakingTimestamp, uint256 _rewardsPerMinutes) internal view returns (uint256) {
         uint256 _minutesElapsed = getMinuteElapsed(_stakingTimestamp);
         uint256 _accumulatedPercentage = _minutesElapsed.mul(_rewardsPerMinutes);
         return _accumulatedPercentage;}
 
-    function getAccumulation(uint256 _value, uint256 _stakingTimestamp, uint256 _rewardsPerMinutes) public view returns (uint256) {
+    function getAccumulation(uint256 _value, uint256 _stakingTimestamp, uint256 _rewardsPerMinutes) internal view returns (uint256) {
         uint256 _accumulatedPercentage = getAccumulatedPercentage(_stakingTimestamp, _rewardsPerMinutes);
         uint256 _accumulation = _value.mul(_accumulatedPercentage).div(divisor);
         return _accumulation;}
 
-    function claimRewards(address _contractAddress, uint256 _tokenId) external nonReentrant {
+    function getTotalAccumulation(address _contractAddress, uint256 _tokenId) public view returns (uint256) {
         require(stakingData[msg.sender][_contractAddress][_tokenId].staked, "NFT not staked");
-        uint256 _nominalValue = stakingData[msg.sender][_contractAddress][_tokenId].tokenValue;
+        uint256 _value = getAccumulation(stakingData[msg.sender][_contractAddress][_tokenId].tokenValue, stakingData[msg.sender][_contractAddress][_tokenId].stakingTimestamp, rewardsPerMinutes);
+        if(stakingData[msg.sender][_contractAddress][_tokenId].boosted == true){
+            _value = _value + getAccumulation(stakingData[msg.sender][_contractAddress][_tokenId].tokenValue, stakingData[msg.sender][_contractAddress][_tokenId].stakingBoostTimestamp, additionalRewards);}        
+        return _value;}
+
+    function claimRewards(address _contractAddress, uint256 _tokenId) external nonReentrant {
         uint256 _valueWhitdrawn = stakingData[msg.sender][_contractAddress][_tokenId].valueWithdrawn;
-        uint256 nftStaked = stakingData[msg.sender][_contractAddress][_tokenId].stakingTimestamp;
-        uint256 _value = getAccumulation(_nominalValue, nftStaked, rewardsPerMinutes);
-        uint256 nosTimestamp = stakingData[msg.sender][_contractAddress][_tokenId].stakingBoostTimestamp;
-        bool nosStaked = stakingData[msg.sender][_contractAddress][_tokenId].boosted;
-        uint256 _valueByNos = 0;
-        if(nosStaked == true){
-            _valueByNos = getAccumulation(_nominalValue, nosTimestamp, additionalRewards);}
-        uint256 _amount = _value + _valueByNos;
+        uint256 _amount = getTotalAccumulation(_contractAddress, _tokenId);
         require(_amount > 0, "No tokens to claim!");
         require(paymentToken.transfer(msg.sender, _amount.mul(90).div(100)) && paymentToken.transfer(devWallet, _amount.mul(10).div(100)) , "Token transfer failed!");
         stakingData[msg.sender][_contractAddress][_tokenId].valueWithdrawn = _valueWhitdrawn + _amount;
         stakingData[msg.sender][_contractAddress][_tokenId].stakingTimestamp = block.timestamp;
-        if(nosStaked == true){
+        if(stakingData[msg.sender][_contractAddress][_tokenId].boosted == true){
             stakingData[msg.sender][_contractAddress][_tokenId].stakingBoostTimestamp = block.timestamp;}}
         
     //Manage Transfer
