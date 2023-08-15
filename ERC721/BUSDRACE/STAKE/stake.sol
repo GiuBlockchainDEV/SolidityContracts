@@ -182,7 +182,7 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
         for (uint i = 0; i < allowedContracts.length; i++) {
             _contractAddress = allowedContracts[i];
             uint256[] memory tokens = ownedTokens[msg.sender][_contractAddress];
-            for(uint e = 0; i < tokens.length; i++) {
+            for(uint e = 0; e < tokens.length; e++) {
                 if(stakingData[msg.sender][_contractAddress][tokens[e]].stakingBoostTimestamp == 0){
                     stakingData[msg.sender][_contractAddress][tokens[e]].boosted = true;
                     stakingData[msg.sender][_contractAddress][tokens[e]].stakingBoostTimestamp = block.timestamp;}}}}
