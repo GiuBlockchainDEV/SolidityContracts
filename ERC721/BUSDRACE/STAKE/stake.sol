@@ -151,33 +151,41 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
         nosNFT = IERC721A(_nosNFT);}
 
     function activeBoost(uint256 _tokenId) external {
-        require(boostData[msg.sender].boosted = false, "Boost already staked");
+        require(!boostData[msg.sender].boosted, "Boost already staked");
         nosNFT.safeTransferFrom(msg.sender, address(this), _tokenId);
         boostData[msg.sender].boosted = true;
         boostData[msg.sender].boostId = _tokenId;
+        address _contractAddress;
         for (uint i = 0; i < allowedContracts.length; i++) {
-            uint256[] memory tokens = ownedTokens[msg.sender][allowedContracts[i]];
+            _contractAddress = allowedContracts[i];
+            uint256[] memory tokens = ownedTokens[msg.sender][_contractAddress];
             for(uint e = 0; i < tokens.length; i++) {
-                if(stakingData[msg.sender][allowedContracts[i]][e].stakingBoostTimestamp == 0){
-                    stakingData[msg.sender][allowedContracts[i]][e].stakingBoostTimestamp = block.timestamp;}}}}
+                stakingData[msg.sender][_contractAddress][tokens[e]].boosted = true;
+                stakingData[msg.sender][_contractAddress][tokens[e]].stakingBoostTimestamp = block.timestamp;}}}
 
     function disactiveBoost(uint256 _tokenId) external {
-        require(boostData[msg.sender].boosted = true, "Boost not staked");
+        require(boostData[msg.sender].boosted, "Boost not staked");
         nosNFT.safeTransferFrom(address(this), msg.sender, _tokenId);
         boostData[msg.sender].boosted = false;
         boostData[msg.sender].boostId = 0;
+        address _contractAddress;
         for (uint i = 0; i < allowedContracts.length; i++) {
-            uint256[] memory tokens = ownedTokens[msg.sender][allowedContracts[i]];
+            _contractAddress = allowedContracts[i];
+            uint256[] memory tokens = ownedTokens[msg.sender][_contractAddress];
             for(uint e = 0; i < tokens.length; i++) {
-                stakingData[msg.sender][allowedContracts[i]][e].stakingBoostTimestamp = 0;}}}
+                stakingData[msg.sender][_contractAddress][tokens[e]].boosted = false;
+                stakingData[msg.sender][_contractAddress][tokens[e]].stakingBoostTimestamp = 0;}}}
     
     function updateBoost() external {
-        require(boostData[msg.sender].boosted = true, "Boost not staked");
+        require(boostData[msg.sender].boosted, "Boost not staked");
+        address _contractAddress;
         for (uint i = 0; i < allowedContracts.length; i++) {
-            uint256[] memory tokens = ownedTokens[msg.sender][allowedContracts[i]];
+            _contractAddress = allowedContracts[i];
+            uint256[] memory tokens = ownedTokens[msg.sender][_contractAddress];
             for(uint e = 0; i < tokens.length; i++) {
-                if(stakingData[msg.sender][allowedContracts[i]][e].stakingBoostTimestamp == 0){
-                    stakingData[msg.sender][allowedContracts[i]][e].stakingBoostTimestamp = block.timestamp;}}}}
+                if(stakingData[msg.sender][_contractAddress][tokens[e]].stakingBoostTimestamp == 0){
+                    stakingData[msg.sender][_contractAddress][tokens[e]].boosted = true;
+                    stakingData[msg.sender][_contractAddress][tokens[e]].stakingBoostTimestamp = block.timestamp;}}}}
 
     function getOwnedTokens(address _wallet, address _contractAddress) public view returns (uint256[] memory) {
         return ownedTokens[_wallet][_contractAddress];}
