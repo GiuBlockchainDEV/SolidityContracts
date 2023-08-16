@@ -110,10 +110,10 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
         totalNFTLocked = totalNFTLocked + 1;
         return true;}
         
-    function getValueWithdrable(address _collection, uint256 _tokenId) public view returns (uint256) {
-        uint256 _nominalValue = stakingData[msg.sender][_collection][_tokenId].tokenValue;
+    function getValueWithdrable(address _caller, address _collection, uint256 _tokenId) public view returns (uint256) {
+        uint256 _nominalValue = stakingData[_caller][_collection][_tokenId].tokenValue;
         uint256 _halfNominalValue = _nominalValue.mul(50).div(100);
-        uint256 _valueWhitdrawn = stakingData[msg.sender][_collection][_tokenId].valueWithdrawn;
+        uint256 _valueWhitdrawn = stakingData[_caller][_collection][_tokenId].valueWithdrawn;
         uint256 _amount = 0;
         if(_valueWhitdrawn > _halfNominalValue){
             _amount = _nominalValue - _valueWhitdrawn;}
@@ -124,7 +124,7 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
     function unstakeNFT(address _collection, uint256 _tokenId) external {
         IERC721A _nftCollection = IERC721A(_collection);
         require(stakingData[msg.sender][_collection][_tokenId].staked, "Token not staked");
-        uint256 amountWhitdrable = getValueWithdrable(_collection, _tokenId);
+        uint256 amountWhitdrable = getValueWithdrable(msg.sender, _collection, _tokenId);
         require(amountWhitdrable > 0, "No tokens to claim!");
         require(paymentToken.transfer(msg.sender, amountWhitdrable.mul(90).div(100)) && paymentToken.transfer(devWallet, amountWhitdrable.mul(10).div(100)) , "Token transfer failed!");
         require(removeToken(_collection, _tokenId), "ID not removed");
@@ -145,8 +145,8 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
 
     IERC721A public nosNFT;
 
-    function checkBoost() public view returns (bool, uint256) {
-        return (boostData[msg.sender].boosted, boostData[msg.sender].boostId);}
+    function checkBoost(address _caller) public view returns (bool, uint256) {
+        return (boostData[_caller].boosted, boostData[_caller].boostId);}
 
     function setNosNFT(address _nosNFT) external onlyOwner {
         nosNFT = IERC721A(_nosNFT);}
@@ -233,25 +233,25 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
         uint256 _accumulation = _value.mul(_accumulatedPercentage).div(divisor);
         return _accumulation;}
 
-    function getTotalAccumulation(address _contractAddress, uint256 _tokenId) public view returns (uint256) {
-        require(stakingData[msg.sender][_contractAddress][_tokenId].staked, "NFT not staked");
-        uint256 _value = getAccumulation(stakingData[msg.sender][_contractAddress][_tokenId].tokenValue, stakingData[msg.sender][_contractAddress][_tokenId].stakingTimestamp, rewardsPerMinutes);
-        if(stakingData[msg.sender][_contractAddress][_tokenId].boosted == true){
-            _value = _value + getAccumulation(stakingData[msg.sender][_contractAddress][_tokenId].tokenValue, stakingData[msg.sender][_contractAddress][_tokenId].stakingBoostTimestamp, additionalRewards);}        
+    function getTotalAccumulation(address _caller, address _contractAddress, uint256 _tokenId) public view returns (uint256) {
+        require(stakingData[_caller][_contractAddress][_tokenId].staked, "NFT not staked");
+        uint256 _value = getAccumulation(stakingData[_caller][_contractAddress][_tokenId].tokenValue, stakingData[_caller][_contractAddress][_tokenId].stakingTimestamp, rewardsPerMinutes);
+        if(stakingData[_caller][_contractAddress][_tokenId].boosted == true){
+            _value = _value + getAccumulation(stakingData[_caller][_contractAddress][_tokenId].tokenValue, stakingData[_caller][_contractAddress][_tokenId].stakingBoostTimestamp, additionalRewards);}        
         return _value;}
 
-    function getAllInformation(address _contractAddress, uint256 _tokenId) public view returns (bool, bool, uint256, uint256, uint256, uint256) {
-        bool _staked = stakingData[msg.sender][_contractAddress][_tokenId].staked;
-        bool _boosted = stakingData[msg.sender][_contractAddress][_tokenId].boosted;
-        uint256 _tokenValue = stakingData[msg.sender][_contractAddress][_tokenId].tokenValue;
-        uint256 _valueWithdrawn = stakingData[msg.sender][_contractAddress][_tokenId].valueWithdrawn;
-        uint256 _valueWhitdrable = getValueWithdrable(_contractAddress, _tokenId);
-        uint256 _accumulation = getTotalAccumulation(_contractAddress, _tokenId);
+    function getAllInformation(address _caller, address _contractAddress, uint256 _tokenId) public view returns (bool, bool, uint256, uint256, uint256, uint256) {
+        bool _staked = stakingData[_caller][_contractAddress][_tokenId].staked;
+        bool _boosted = stakingData[_caller][_contractAddress][_tokenId].boosted;
+        uint256 _tokenValue = stakingData[_caller][_contractAddress][_tokenId].tokenValue;
+        uint256 _valueWithdrawn = stakingData[_caller][_contractAddress][_tokenId].valueWithdrawn;
+        uint256 _valueWhitdrable = getValueWithdrable(_caller, _contractAddress, _tokenId);
+        uint256 _accumulation = getTotalAccumulation(_caller, _contractAddress, _tokenId);
         return(_staked, _boosted, _tokenValue, _valueWhitdrable, _valueWithdrawn, _accumulation);}
 
     function claimRewards(address _contractAddress, uint256 _tokenId) external nonReentrant {
         uint256 _valueWhitdrawn = stakingData[msg.sender][_contractAddress][_tokenId].valueWithdrawn;
-        uint256 _amount = getTotalAccumulation(_contractAddress, _tokenId);
+        uint256 _amount = getTotalAccumulation(msg.sender, _contractAddress, _tokenId);
         require(_amount > 0, "No tokens to claim!");
         require(paymentToken.transfer(msg.sender, _amount.mul(90).div(100)) && paymentToken.transfer(devWallet, _amount.mul(10).div(100)) , "Token transfer failed!");
         stakingData[msg.sender][_contractAddress][_tokenId].valueWithdrawn = _valueWhitdrawn + _amount;
