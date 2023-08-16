@@ -23,6 +23,7 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
     mapping(address => boostInfo) public boostData;
     mapping(address => mapping(address => mapping(uint256 => stakingInfo))) public stakingData;
     mapping(address => address[]) public addedContracts;
+
     mapping(address => mapping (address => uint256[])) public ownedTokens;
 
     //Wallet for tax
@@ -238,6 +239,14 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
         if(stakingData[msg.sender][_contractAddress][_tokenId].boosted == true){
             _value = _value + getAccumulation(stakingData[msg.sender][_contractAddress][_tokenId].tokenValue, stakingData[msg.sender][_contractAddress][_tokenId].stakingBoostTimestamp, additionalRewards);}        
         return _value;}
+
+    function getAllInformation(address _contractAddress, uint256 _tokenId) public view returns (bool, bool, uint256, uint256, uint256) {
+        bool _staked = stakingData[msg.sender][_contractAddress][_tokenId].staked;
+        bool _boosted = stakingData[msg.sender][_contractAddress][_tokenId].boosted;
+        uint256 _tokenValue = stakingData[msg.sender][_contractAddress][_tokenId].tokenValue;
+        uint256 _valueWithdrawn = stakingData[msg.sender][_contractAddress][_tokenId].valueWithdrawn;
+        uint256 _accumulation = getTotalAccumulation(_contractAddress, _tokenId);
+        return(_staked, _boosted, _tokenValue, _valueWithdrawn, _accumulation);}
 
     function claimRewards(address _contractAddress, uint256 _tokenId) external nonReentrant {
         uint256 _valueWhitdrawn = stakingData[msg.sender][_contractAddress][_tokenId].valueWithdrawn;
