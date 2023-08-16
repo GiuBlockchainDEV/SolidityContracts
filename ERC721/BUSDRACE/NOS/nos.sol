@@ -63,9 +63,10 @@ contract nos is ERC721A, Ownable, ReentrancyGuard {
 
     modifier mintCompliance(uint256 _mintAmount) {
         require(!paused, "Contract is paused!");
-        require(_mintAmount > 0 && _mintAmount < 2 , "Invalid mint amount!");
+        require(_mintAmount == 1 , "Invalid mint amount!");
+        require(minted[msg.sender] == 0 , "Invalid mint amount!");
         require(totalSupply() + _mintAmount <= maxSupply, "Max supply exceeded");
-        require(balanceOf(msg.sender) < 1, "Max 1 mint for wallet");
+        require(balanceOf(msg.sender) == 0, "Max 1 mint for wallet");
         _;}
 
     modifier mintPriceCompliance(uint256 _mintAmount) {
@@ -119,7 +120,15 @@ contract nos is ERC721A, Ownable, ReentrancyGuard {
         uint256 _totalSupply = maxSupply;
         return (_mintedNFT, _totalSupply);}
 
+    function getOwnedNFTs(address owner) external view returns (uint[] memory) {
+        IERC721Enumerable _address = IERC721Enumerable(address(this));
+        uint256 balance = balanceOf(owner); 
+        uint[] memory ownedNFTs = new uint[](balance); 
+
+        for (uint i = 0; i < balance; i++) {
+            ownedNFTs[i] = _address.tokenOfOwnerByIndex(owner, i);}
+        return ownedNFTs;}
+
     receive() external payable {}
 
     fallback() external payable {}}
-
