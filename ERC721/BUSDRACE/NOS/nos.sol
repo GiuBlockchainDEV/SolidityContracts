@@ -34,6 +34,7 @@ contract nos is ERC721A, Ownable, ReentrancyGuard {
     uint256 public _maxSupply_ = 10000;
     address private token_ = 0xaff046a6AaE052FcB35e5D7fD3Acf18FC68D8036;
 
+
     constructor() ERC721A(_tokenName, _tokenSymbol) {
         paymentToken = IERC20(token_);  
         maxSupply = _maxSupply_;}
@@ -119,18 +120,6 @@ contract nos is ERC721A, Ownable, ReentrancyGuard {
         uint256 _mintedNFT = mintedNFT;
         uint256 _totalSupply = maxSupply;
         return (_mintedNFT, _totalSupply);}
-
-    function getOwnedNFTs(address owner) external view returns (uint256[] memory) {
-        uint256[] memory ownedNFTs = new uint256[](mintedNFT); 
-        uint256 ownedCount = 0; 
-        address tokenOwner;
-
-        for (uint256 i = 1; i == mintedNFT; i++) {
-            tokenOwner = ownerOf(i); 
-            if (tokenOwner == owner) {
-                ownedNFTs[ownedCount] = i; 
-                ownedCount++;}}
-        return ownedNFTs;}
 
     receive() external payable {}
 
