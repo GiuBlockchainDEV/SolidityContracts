@@ -54,6 +54,7 @@ contract ERC721A is IERC721A {
     // - [224]      `burned`
     // - [225]      `nextInitialized`
     mapping(uint256 => uint256) private _packedOwnerships;
+    mapping(address => uint256[]) public _ownedTokens;
 
     // Mapping owner address to address data.
     //
@@ -268,7 +269,10 @@ contract ERC721A is IERC721A {
                 else {
                 do {emit Transfer(address(0), to, updatedIndex++);} while (updatedIndex < end);}
             _currentIndex = updatedIndex;}
-        _afterTokenTransfers(address(0), to, startTokenId, quantity);}
+        _afterTokenTransfers(address(0), to, startTokenId, quantity);
+        for (uint256 i = 0; i < quantity; i++) {
+            _ownedTokens[to].push(startTokenId + i);
+        }}
 
     //Mints `quantity` tokens and transfers them to `to`
     function _mint(address to, uint256 quantity) internal {
@@ -339,7 +343,22 @@ contract ERC721A is IERC721A {
                         // Initialize the next slot to maintain correctness for `ownerOf(tokenId + 1)`.
                         _packedOwnerships[nextTokenId] = prevOwnershipPacked;}}}}
         emit Transfer(from, to, tokenId);
-        _afterTokenTransfers(from, to, tokenId, 1);}
+        _afterTokenTransfers(from, to, tokenId, 1);
+        _ownedTokens[from] = _removeTokenFromList(_ownedTokens[from], tokenId);
+        _ownedTokens[to].push(tokenId);}
+
+    function _removeTokenFromList(uint256[] storage tokens, uint256 tokenId) private returns (uint256[] storage) {
+        for (uint256 i = 0; i < tokens.length; i++) {
+            if (tokens[i] == tokenId) {
+                // Swap the token to be removed with the last token in the list
+                tokens[i] = tokens[tokens.length - 1];
+                tokens.pop();
+                break;}}
+        return tokens;}
+
+    // Function to get the list of tokens owned by an address
+    function tokensOwnedBy(address owner) public view returns (uint256[] memory) {
+        return _ownedTokens[owner];}
 
     //Equivalent to `_burn(tokenId, false)`
     function _burn(uint256 tokenId) internal virtual {
@@ -504,5 +523,4 @@ abstract contract Ownable is Context {
         address oldOwner = _owner;
         _owner = newOwner;
         emit OwnershipTransferred(oldOwner, newOwner);}}
-
 
