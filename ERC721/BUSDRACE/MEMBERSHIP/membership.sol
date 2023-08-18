@@ -24,14 +24,15 @@ contract membership is ERC721A, Ownable, ReentrancyGuard {
     uint256 public lastMintedTokenId;
     uint256 public maxSupply;
 
-    uint256 public nominalPriceNFT = 99*(10**18);
-    uint256 public priceNFT = 98*(10**18);
+    uint256 public decimals = 18;
+    uint256 public nominalPriceNFT = 99*(10**decimals);
+    uint256 public priceNFT = 99*(10**decimals);
     string public hiddenMetadataUri = "ipfs://---/hidden.json";
 
-    string public _tokenName = "Membership NFT";
-    string public _tokenSymbol = "MNFT";
+    string public _tokenName = "Membership VIP NFT";
+    string public _tokenSymbol = "MVNFT";
     uint256 public _maxSupply_ = 10000;
-    address private token_ = 0xaff046a6AaE052FcB35e5D7fD3Acf18FC68D8036;
+    address private token_;
 
     constructor() ERC721A(_tokenName, _tokenSymbol) {
         paymentToken = IERC20(token_);  
@@ -48,8 +49,9 @@ contract membership is ERC721A, Ownable, ReentrancyGuard {
     function setModerator(address _moderator) external onlyOwner {
         moderator = _moderator;}
 
-    function setPrice(uint256 _price) external onlyModerator {
-        priceNFT = _price;}
+    function setPrice(uint256 _price, uint256 _decimals) external onlyModerator {
+        priceNFT = _price;
+        decimals = _decimals;}
 
     function getPrice() external view returns(uint256, uint256) {
         return (nominalPriceNFT, priceNFT);
