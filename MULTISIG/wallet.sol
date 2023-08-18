@@ -6,49 +6,59 @@ import "./library.sol";
 import "./contract.sol";
 
 contract Shared_Wallet is Allowance {
-    event MoneySent(address indexed _beneficiary, uint256 _amount);
-    event MoneyReceived(address indexed _from, uint256 _amount);
-
+    event EtherSent(address indexed _beneficiary, uint256 _amount);
+    event EtherReceived(address indexed _from, uint256 _amount);
+    event TokenSent(address indexed _beneficiary, uint256 _amount, address _token);
+    event TokenReceived(address indexed _from, uint256 _amount, address _token);
     using SafeERC20 for IERC20;
 
-// @dev  owner and allowed users can withdraw money. owner has access to withdraw unlimited amount but allowed users allowance will be reduced. 
-// @param  adress to whom user want to send money (user's own account or other account)
-// @param  amount to be withdrawn
-// emits MoneySent event.
-
-  function withdrawMoney(address payable _to,  uint256 _amount) public payable ownerOrAllowed(_amount) {
+    function withdrawMoney(address payable _to,  uint256 _amount) public payable ownerOrAllowed(_amount) {
         require(_amount <= address(this).balance, "Contract out of money");
         if(!isOwner()) {
             _reduceAllowance(msg.sender, _amount);}
-        emit MoneySent(_to, _amount);
+        emit EtherSent(_to, _amount);
         _to.transfer(_amount);}
 
-// @dev  this can only be called by the owner if he wants to reduce the allowance of a user.
-// **  called the internal function from 'Allowance.sol' to make it callable by the owner externally.
+    function payUserETHER(address payable _to,  uint256 _amount) public payable ownerOrAllowed(_amount) {
+        require(_amount <= address(this).balance, "Contract out of money");
+        if(!isOwner()) {
+            _reduceAllowance(msg.sender, _amount);}
+        emit EtherSent(_to, _amount);
+        _to.transfer(_amount);}
 
     function reduceAllowance(address _who, uint256 _amount) public onlyOwner {
         super._reduceAllowance(_who, _amount);}
 
     receive() external payable {
-        emit MoneyReceived(msg.sender, msg.value);}
+        emit EtherReceived(msg.sender, msg.value);}
 
     function getContractBalance() public view onlyOwner returns (uint256) {
         return address(this).balance;}
 
-    function depositTokens(address tokenAddress, uint256 amount) public onlyOwner {
+    function depositTokens(address tokenAddress, uint256 amount) public {
         require(tokenAddress != address(0), "Invalid token address");
         require(amount > 0, "Amount must be greater than 0");
         
         IERC20 token = IERC20(tokenAddress);
-        token.safeTransferFrom(msg.sender, address(this), amount);}
+        token.safeTransferFrom(msg.sender, address(this), amount);
+        emit TokenReceived(msg.sender, amount, tokenAddress);}
 
     // Function to withdraw ERC-20 tokens from the contract
-    function withdrawTokens(address tokenAddress, uint256 amount) public onlyOwner {
+    function withdrawTokens(address tokenAddress, uint256 amount) public ownerOrAllowedERC20(amount, tokenAddress) {
         require(tokenAddress != address(0), "Invalid token address");
         require(amount > 0, "Amount must be greater than 0");
         
         IERC20 token = IERC20(tokenAddress);
-        token.safeTransfer(msg.sender, amount);}
+        token.safeTransfer(msg.sender, amount);
+        emit TokenSent(msg.sender, amount, tokenAddress);}
+
+    function payUserERC20(address tokenAddress, address receiver, uint256 amount) public ownerOrAllowedERC20(amount, tokenAddress) {
+        require(tokenAddress != address(0), "Invalid token address");
+        require(amount > 0, "Amount must be greater than 0");
+        
+        IERC20 token = IERC20(tokenAddress);
+        token.safeTransfer(receiver, amount);
+        emit TokenSent(receiver, amount, tokenAddress);}    
 
      function renounceOwnership() public override virtual onlyOwner {
-        revert("can't renounce ownership");}} // overrided the renounceOwnership in Ownable.sol  
+        revert("can't renounce ownership");}} 
