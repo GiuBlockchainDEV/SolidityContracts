@@ -51,4 +51,4 @@ contract Shared_Wallet is Allowance {
         token.safeTransfer(msg.sender, amount);}
 
      function renounceOwnership() public override virtual onlyOwner {
-        revert("can't renounce ownership"); // overrided the renounceOwnership in Ownable.sol}}    
+        revert("can't renounce ownership");}} // overrided the renounceOwnership in Ownable.sol  
