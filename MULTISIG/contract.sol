@@ -2,6 +2,7 @@
 
 pragma solidity ^0.8.18;
 
+import "./library.sol";
 abstract contract ReentrancyGuard {
     uint256 private constant _NOT_ENTERED = 1;
     uint256 private constant _ENTERED = 2;
@@ -59,8 +60,13 @@ abstract contract Ownable is Context {
 
 contract Allowance is Ownable {
     event AllowanceChanged(address indexed _from, address indexed _toWhom, uint256 _oldAmount, uint256 _newAmount);
+    event TokenAllowanceChanged(address indexed _from, address indexed _toWhom, uint256 _oldAmount, uint256 _newAmount, address _tokenAddress);
+
     mapping(address => uint256) public allowance;
+    mapping(address => mapping(address => uint256)) public allowanceToken;
+
     bool isAllowanceSet;
+    bool isTokenAllowanceSet;
 
     function isOwner() internal view returns (bool) {
         return owner() == msg.sender;}
@@ -71,8 +77,18 @@ contract Allowance is Ownable {
         allowance[_who] = _amount;
         isAllowanceSet = true;}
 
+    function setAllowanceERC20(address _who, uint256 _amount, address tokenAddress) public onlyOwner {
+        require(isTokenAllowanceSet ==  false, "Allowance Already Set");
+        emit TokenAllowanceChanged(msg.sender, _who, allowanceToken[_who][tokenAddress], _amount, tokenAddress);
+        allowanceToken[_who][tokenAddress] = _amount;
+        isTokenAllowanceSet = true;}
+
     modifier ownerOrAllowed(uint256 _amount) {
         require(isOwner() || allowance[msg.sender] >= _amount, "You're not allwoed");
+        _;}
+
+    modifier ownerOrAllowedERC20(uint256 _amount, address tokenAddress) {
+        require(isOwner() || allowanceToken[msg.sender][tokenAddress] >= _amount, "You're not allwoed");
         _;}
 
     function _reduceAllowance(address _who, uint256 _amount) internal ownerOrAllowed(_amount) {
@@ -87,4 +103,18 @@ contract Allowance is Ownable {
         if (isAllowanceSet) {
           allowance[_who] += _amount;} 
         else {
-            revert ("Allowance not set");}}}
+            revert ("Allowance not set");}}
+
+    function _reduceAllowanceERC20(address _who, uint256 _amount, address tokenAddress) internal ownerOrAllowedERC20(_amount, tokenAddress) {
+        emit TokenAllowanceChanged(msg.sender, _who, allowanceToken[_who][tokenAddress], allowanceToken[_who][tokenAddress] - _amount, tokenAddress);
+        if (isTokenAllowanceSet) {
+          allowanceToken[_who][tokenAddress] -= _amount;} 
+        else {
+            revert ("Allowance not set");}}
+
+    function increaseAllowanceERC20(address _who, uint256 _amount, address tokenAddress) public onlyOwner {
+        emit TokenAllowanceChanged(msg.sender, _who, allowanceToken[_who][tokenAddress], allowanceToken[_who][tokenAddress] + _amount, tokenAddress);
+        if (isTokenAllowanceSet) {
+          allowanceToken[_who][tokenAddress] += _amount;} 
+        else {
+            revert ("Allowance not set");}}
