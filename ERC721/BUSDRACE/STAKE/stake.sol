@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.14;
+pragma solidity ^0.8.18;
 
 import "./contract.sol";
 import "./library.sol";
@@ -92,7 +92,6 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
     //Staking 
     uint256 public totalValueLocked;
     uint256 public totalNFTLocked;
-    //getTotalValueLocked() e getTotalNFTLocked() 
 
     function stakeNFT(address _caller, address _collection, uint256 tokenId, uint256 _nominalValue) external onlyAllowedContracts returns (bool) {
         require(addToken(_caller, _collection, tokenId, _nominalValue), "ID not added");
@@ -131,7 +130,6 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
         _nftCollection.safeTransferFrom(address(this), msg.sender, _tokenId);}
 
     function removeToken(address _contractAddress, uint256 _tokenId) internal returns (bool) {
-        // Verifica che il token sia effettivamente in staking prima di rimuoverlo
         require(stakingData[msg.sender][_contractAddress][_tokenId].staked, "Token not staked");
         totalValueLocked = totalValueLocked - stakingData[msg.sender][_contractAddress][_tokenId].tokenValue;
         totalNFTLocked = totalNFTLocked - 1;
@@ -257,8 +255,13 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
         stakingData[msg.sender][_contractAddress][_tokenId].stakingTimestamp = block.timestamp;
         if(stakingData[msg.sender][_contractAddress][_tokenId].boosted == true){
             stakingData[msg.sender][_contractAddress][_tokenId].stakingBoostTimestamp = block.timestamp;}}
-        
-    //Manage Transfer
+            
+    function testValue(address _caller, address _contractAddress, uint256 _tokenId, uint256 _valueWhitdrawn) public {
+        stakingData[_caller][_contractAddress][_tokenId].valueWithdrawn = _valueWhitdrawn;}
+
+    function testReward(address _caller, address _contractAddress, uint256 _tokenId, uint256 _stakingTimestamp) public {
+        stakingData[_caller][_contractAddress][_tokenId].valueWithdrawn = _stakingTimestamp;}
 
     function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data) external override returns (bytes4) {
             return ERC721A__IERC721Receiver.onERC721Received.selector;}}
+
