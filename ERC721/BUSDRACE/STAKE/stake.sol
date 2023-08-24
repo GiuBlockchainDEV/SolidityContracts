@@ -63,7 +63,7 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
     function removeAllowedContract(address _contractAddress) public onlyOwner {
         for (uint256 i = 0; i < allowedContracts.length; i++) {
             if (allowedContracts[i] == _contractAddress) {
-                allowedContracts[i] = allowedContracts[allowedContracts.length - 1];
+                allowedContracts[i] = allowedContracts[allowedContracts.length.sub(1)];
                 allowedContracts.pop();
                 break;}}}
 
@@ -105,8 +105,8 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
         stakingData[_caller][_contractAddress][_tokenId].tokenValue = _value;
         stakingData[_caller][_contractAddress][_tokenId].stakingTimestamp = block.timestamp;
         ownedTokens[_caller][_contractAddress].push(_tokenId);
-        totalValueLocked = totalValueLocked + _value;
-        totalNFTLocked = totalNFTLocked + 1;
+        totalValueLocked = totalValueLocked.add(_value);
+        totalNFTLocked = totalNFTLocked.add(1);
         return true;}
         
     function getValueWithdrable(address _caller, address _collection, uint256 _tokenId) public view returns (uint256) {
@@ -119,7 +119,7 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
             if(_valueWhitdrawn > _nominalValue){
                 _amount = 0;}
             else{
-                _amount = _nominalValue - _valueWhitdrawn;}}
+                _amount = _nominalValue.sub(_valueWhitdrawn);}}
         else{
             _amount = _halfNominalValue;}
         return _amount;}
@@ -135,8 +135,8 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
 
     function removeToken(address _contractAddress, uint256 _tokenId) internal returns (bool) {
         require(stakingData[msg.sender][_contractAddress][_tokenId].staked, "Token not staked");
-        totalValueLocked = totalValueLocked - stakingData[msg.sender][_contractAddress][_tokenId].tokenValue;
-        totalNFTLocked = totalNFTLocked - 1;
+        totalValueLocked = totalValueLocked.sub(stakingData[msg.sender][_contractAddress][_tokenId].tokenValue);
+        totalNFTLocked = totalNFTLocked.sub(1);
         stakingData[msg.sender][_contractAddress][_tokenId].staked = false;
         stakingData[msg.sender][_contractAddress][_tokenId].tokenValue = 0;
         stakingData[msg.sender][_contractAddress][_tokenId].stakingTimestamp = 0;
@@ -144,7 +144,6 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
         return true;}
 
     //NOS
-
     IERC721A public nosNFT;
 
     function checkBoost(address _caller) public view returns (bool, uint256) {
@@ -200,8 +199,9 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
 
     //Claim & Compound Rewards
 
-    uint256 public rewardsPerMinutes = 1736;
-    uint256 public additionalRewards = 694;
+    uint256 public moltiplicator = 1;
+    uint256 public rewardsPerMinutes = 1736 * moltiplicator;
+    uint256 public additionalRewards = 694 * moltiplicator;
     uint256 public divisor = 100000000;
 
     function compound(address _contractAddress, uint256 _tokenId) external nonReentrant returns (bool) {
@@ -214,7 +214,7 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
         uint256 _valueCompundByNos = 0;
         if(nosStaked == true){
             _valueCompundByNos = getAccumulation(_nominalValue, nosTimestamp, additionalRewards);}
-        totalValueLocked = totalValueLocked + _valueCompund + _valueCompundByNos;
+        totalValueLocked = (totalValueLocked.add(_valueCompund)).add(_valueCompundByNos);
         stakingData[msg.sender][_contractAddress][_tokenId].tokenValue = _nominalValue + _valueCompund + _valueCompundByNos;
         stakingData[msg.sender][_contractAddress][_tokenId].stakingTimestamp = block.timestamp;
         if(nosStaked == true){
@@ -222,7 +222,7 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
         return true;}
 
     function getMinuteElapsed(uint256 _stakingTimestamp) internal view returns (uint256) {
-        uint256 _minutesElapsed = (block.timestamp - _stakingTimestamp).div(60);
+        uint256 _minutesElapsed = (block.timestamp.sub(_stakingTimestamp)).div(60);
         return _minutesElapsed;}
 
     function getAccumulatedPercentage(uint256 _stakingTimestamp, uint256 _rewardsPerMinutes) internal view returns (uint256) {
@@ -239,7 +239,7 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
         require(stakingData[_caller][_contractAddress][_tokenId].staked, "NFT not staked");
         uint256 _value = getAccumulation(stakingData[_caller][_contractAddress][_tokenId].tokenValue, stakingData[_caller][_contractAddress][_tokenId].stakingTimestamp, rewardsPerMinutes);
         if(stakingData[_caller][_contractAddress][_tokenId].boosted == true){
-            _value = _value + getAccumulation(stakingData[_caller][_contractAddress][_tokenId].tokenValue, stakingData[_caller][_contractAddress][_tokenId].stakingBoostTimestamp, additionalRewards);}        
+            _value = _value.add(getAccumulation(stakingData[_caller][_contractAddress][_tokenId].tokenValue, stakingData[_caller][_contractAddress][_tokenId].stakingBoostTimestamp, additionalRewards));}        
         return _value;}
 
     function getAllInformation(address _caller, address _contractAddress, uint256 _tokenId) public view returns (uint256, bool, bool, uint256, uint256, uint256) {
@@ -255,7 +255,7 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
         uint256 _amount = getTotalAccumulation(msg.sender, _contractAddress, _tokenId);
         require(_amount > 0, "No tokens to claim!");
         require(paymentToken.transfer(msg.sender, _amount.mul(90).div(100)) && paymentToken.transfer(devWallet, _amount.mul(10).div(100)) , "Token transfer failed!");
-        stakingData[msg.sender][_contractAddress][_tokenId].valueWithdrawn = _valueWhitdrawn + _amount;
+        stakingData[msg.sender][_contractAddress][_tokenId].valueWithdrawn = _valueWhitdrawn.add(_amount);
         stakingData[msg.sender][_contractAddress][_tokenId].stakingTimestamp = block.timestamp;
         if(stakingData[msg.sender][_contractAddress][_tokenId].boosted == true){
             stakingData[msg.sender][_contractAddress][_tokenId].stakingBoostTimestamp = block.timestamp;}}
@@ -264,7 +264,11 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
         stakingData[_caller][_contractAddress][_tokenId].valueWithdrawn = _valueWhitdrawn;}
 
     function testReward(address _caller, address _contractAddress, uint256 _tokenId, uint256 _stakingTimestamp) public {
-        stakingData[_caller][_contractAddress][_tokenId].valueWithdrawn = _stakingTimestamp;}
+        stakingData[_caller][_contractAddress][_tokenId].stakingTimestamp = _stakingTimestamp;}
+    
+    function multiplyReward(uint256 _moltiplicator) public {
+        moltiplicator = _moltiplicator;}
 
     function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data) external override returns (bytes4) {
             return ERC721A__IERC721Receiver.onERC721Received.selector;}}
+
