@@ -110,12 +110,16 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
         return true;}
         
     function getValueWithdrable(address _caller, address _collection, uint256 _tokenId) public view returns (uint256) {
+        //da aggiungere except
         uint256 _nominalValue = stakingData[_caller][_collection][_tokenId].tokenValue;
         uint256 _halfNominalValue = _nominalValue.mul(50).div(100);
         uint256 _valueWhitdrawn = stakingData[_caller][_collection][_tokenId].valueWithdrawn;
         uint256 _amount = 0;
         if(_valueWhitdrawn > _halfNominalValue){
-            _amount = _nominalValue - _valueWhitdrawn;}
+            if(_valueWhitdrawn > _nominalValue){
+                _amount = 0;}
+            else{
+                _amount = _nominalValue - _valueWhitdrawn;}}
         else{
             _amount = _halfNominalValue;}
         return _amount;}
@@ -264,4 +268,3 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
 
     function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data) external override returns (bytes4) {
             return ERC721A__IERC721Receiver.onERC721Received.selector;}}
-
