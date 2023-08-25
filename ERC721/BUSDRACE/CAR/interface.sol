@@ -189,13 +189,10 @@ interface IERC20 {
      *
      * Emits a {Transfer} event.
      */
-    function transferFrom(address from, address to, uint256 value) external returns (bool);
-}
+    function transferFrom(address from, address to, uint256 value) external returns (bool);}
 
 interface ERC721A__IERC721Receiver {
     function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data) external returns (bytes4);}
 
 interface STAKE721 {
-    function stakeNFT(address caller, address contractAddress, uint256 tokenId, uint256 value) external returns (bool);
-}
-
+    function stakeNFT(address caller, address contractAddress, uint256 tokenId, uint256 value) external returns (bool);}
