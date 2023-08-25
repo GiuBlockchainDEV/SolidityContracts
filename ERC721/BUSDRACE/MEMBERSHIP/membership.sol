@@ -22,7 +22,7 @@ contract membership is ERC721A, Ownable, ReentrancyGuard {
 
     uint256 public mintedNFT;
     uint256 public lastMintedTokenId;
-    uint256 public maxSupply;
+    uint256 public maxSupply = 10000;
 
     uint256 public decimals = 18;
     uint256 public nominalPriceNFT = 99*(10**decimals);
@@ -31,12 +31,9 @@ contract membership is ERC721A, Ownable, ReentrancyGuard {
 
     string public _tokenName = "Membership VIP NFT";
     string public _tokenSymbol = "MVNFT";
-    uint256 public _maxSupply_ = 10000;
     address private token_;
 
-    constructor() ERC721A(_tokenName, _tokenSymbol) {
-        paymentToken = IERC20(token_);  
-        maxSupply = _maxSupply_;}
+    constructor() ERC721A(_tokenName, _tokenSymbol) {}
 
     //Moderator
 
