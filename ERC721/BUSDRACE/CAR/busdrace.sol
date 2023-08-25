@@ -39,7 +39,7 @@ contract car is ERC721A, Ownable, ReentrancyGuard {
         _tokenName = tokenName_;
         _tokenSymbol = tokenSymbol_;
         nominalPriceNFT = nominalPriceNFT_*(10**decimals);
-        priceNFT = nominalPriceNFT_;}
+        priceNFT = nominalPriceNFT_*(10**decimals);}
 
     address public moderator;
 
