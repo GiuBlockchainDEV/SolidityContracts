@@ -25,8 +25,9 @@ contract nos is ERC721A, Ownable, ReentrancyGuard {
     uint256 public maxSupply = 10000;
     bool internal lockPause;
 
-    uint256 public nominalPriceNFT = 199*(10**18);
-    uint256 public priceNFT = 98*(10**18);
+    uint256 public decimals = 18;
+    uint256 public nominalPriceNFT = 199*(10**decimals);
+    uint256 public priceNFT = nominalPriceNFT;
     string public hiddenMetadataUri = "ipfs://---/hidden.json";
 
     string public _tokenName = "NOS BUSDRACE";
@@ -49,8 +50,9 @@ contract nos is ERC721A, Ownable, ReentrancyGuard {
     function setModerator(address _moderator) public onlyOwner {
         moderator = _moderator;}
 
-    function setPrice(uint256 _price) public onlyModerator {
-        priceNFT = _price;}
+    function setPrice(uint256 _price, uint256 _decimals) public onlyModerator {
+        decimals = _decimals;
+        priceNFT = _price*(10**decimals);}
 
     function getPrice() external view returns(uint256, uint256) {
         return (nominalPriceNFT, priceNFT);}
