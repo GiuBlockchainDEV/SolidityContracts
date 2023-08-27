@@ -22,7 +22,7 @@ contract nos is ERC721A, Ownable, ReentrancyGuard {
 
     uint256 public mintedNFT;
     uint256 public lastMintedTokenId;
-    uint256 public maxSupply;
+    uint256 public maxSupply = 10000;
     bool internal lockPause;
 
     uint256 public nominalPriceNFT = 199*(10**18);
@@ -32,12 +32,11 @@ contract nos is ERC721A, Ownable, ReentrancyGuard {
     string public _tokenName = "NOS BUSDRACE";
     string public _tokenSymbol = "NOS";
     uint256 public _maxSupply_ = 10000;
-    address private token_ = 0xaff046a6AaE052FcB35e5D7fD3Acf18FC68D8036;
+    address private token_ = 0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56;
 
 
     constructor() ERC721A(_tokenName, _tokenSymbol) {
-        paymentToken = IERC20(token_);  
-        maxSupply = _maxSupply_;}
+        paymentToken = IERC20(token_);}
 
     //Moderator
 
