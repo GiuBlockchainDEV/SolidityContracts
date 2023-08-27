@@ -199,7 +199,6 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
 
     //Claim & Compound Rewards
 
-    uint256 public moltiplicator = 1;
     uint256 public rewardsPerMinutes = 1736;
     uint256 public additionalRewards = 694;
     uint256 public divisor = 100000000;
@@ -259,16 +258,6 @@ contract NFTStaking is ERC721A__IERC721Receiver, Ownable, ReentrancyGuard {
         stakingData[msg.sender][_contractAddress][_tokenId].stakingTimestamp = block.timestamp;
         if(stakingData[msg.sender][_contractAddress][_tokenId].boosted == true){
             stakingData[msg.sender][_contractAddress][_tokenId].stakingBoostTimestamp = block.timestamp;}}
-            
-    function testValue(address _caller, address _contractAddress, uint256 _tokenId, uint256 _valueWhitdrawn) public {
-        stakingData[_caller][_contractAddress][_tokenId].valueWithdrawn = _valueWhitdrawn;}
-
-    function testReward(address _caller, address _contractAddress, uint256 _tokenId, uint256 _stakingTimestamp) public {
-        stakingData[_caller][_contractAddress][_tokenId].stakingTimestamp = _stakingTimestamp;}
-    
-    function multiplyReward(uint256 _moltiplicator) public {
-        rewardsPerMinutes = 1736 * _moltiplicator;
-        additionalRewards = 694 * _moltiplicator;}
 
     function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data) external override returns (bytes4) {
             return ERC721A__IERC721Receiver.onERC721Received.selector;}}
