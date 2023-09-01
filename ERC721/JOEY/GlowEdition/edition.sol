@@ -1,120 +1,157 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.18;
+/*
+  ____                         
+ |  _ \  ___  _ __ ___    ___  
+ | |_) |/ _ \| '_ ` _ \  / _ \ 
+ |  _ <|  __/| | | | | || (_) |
+ |_| \_\\___||_| |_| |_| \___/                           
+   _____  _                   ______     _  _  _    _               
+  / ____|| |                 |  ____|   | |(_)| |  (_)              
+ | |  __ | |  ___ __      __ | |__    __| | _ | |_  _   ___   _ __  
+ | | |_ || | / _ \\ \ /\ / / |  __|  / _` || || __|| | / _ \ | '_ \ 
+ | |__| || || (_) |\ V  V /  | |____| (_| || || |_ | || (_) || | | |
+  \_____||_| \___/  \_/\_/   |______|\__,_||_| \__||_| \___/ |_| |_|
+                                                                                                                                                  
+Artist and Founder: Joey Tadiar
+Smart Contract: giudev.eth
+Technology: Forint Finance Ltd
 
+*/
+
+
+import "./contract.sol";
 import "./library.sol";
-abstract contract ReentrancyGuard {
-    uint256 private constant _NOT_ENTERED = 1;
-    uint256 private constant _ENTERED = 2;
-    uint256 private _status;
 
-    constructor() {
-        _status = _NOT_ENTERED;}
+pragma solidity ^0.8.14;
 
-    modifier nonReentrant() {
-        // On the first call to nonReentrant, _notEntered will be true
-        require(_status != _ENTERED, "ReentrancyGuard: reentrant call");
-        // Any calls to nonReentrant after this point will fail
-        _status = _ENTERED;
-        _;
-        _status = _NOT_ENTERED;}}
+contract remosworldsubcontract is ERC721A, Ownable, ReentrancyGuard {
+    using Strings for uint256;
 
-abstract contract Context {
-    function _msgSender() internal view virtual returns (address) {
-        return msg.sender;}
+    IERC721A public remosAddress;
 
-    function _msgData() internal view virtual returns (bytes calldata) {
-        return msg.data;}}
+    string public uriPrefix = "";
+    string public uriSuffix = "";
 
-abstract contract Ownable is Context {
-    address private _owner;
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    bool public revealed = false;
+    bool public paused = true;
+    
+    mapping(address => uint) public minted;
+    mapping(uint => bool) public idMinted;
 
-    constructor() {
-        //dev Initializes the contract setting the deployer as the initial owner
-        _transferOwnership(_msgSender());}
+    uint256 public maxSupply = 500;
+    uint256 public maxWalletAmount;
+    
 
-    function owner() public view virtual returns (address) {
-        //Returns the address of the current owner
-        return _owner;}
+    uint256 public mintedNFT;
+    
+    uint256 public priceNFT = 0 ether;
+    string public hiddenMetadataUri = "ipfs://QmacJbn9XuPeS11HLTSvCHfWTAKJ3x5xAoeFzGNZjXQ4hM/";
 
-    modifier onlyOwner() {
-        //Throws if called by any account other than the owner
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+    string public _name = "REMO: Glow Edition";
+    string public _symbol = "REM003";
+    
+    constructor() ERC721A(_name, _symbol) {}
+
+    modifier mintCompliance(uint256 _mintAmount) {
+        require(msg.value >= priceNFT * _mintAmount, "Insufficient Funds");
+        require(totalSupply() + _mintAmount <= maxSupply, "Mintable supply exceeded!");
+        require(paused == false, "Contract paused");
         _;}
 
-    function renounceOwnership() public virtual onlyOwner {
-        //Leaves the contract without owner
-        _transferOwnership(address(0));}
+    function checkBalance(address _addr) public view returns (uint256) {
+        uint256 balance = remosAddress.balanceOf(_addr);
+        return balance;}
 
-    function transferOwnership(address newOwner) public virtual onlyOwner {
-        //Transfers ownership of the contract to a new account (`newOwner`)
-        require(newOwner != address(0), "Ownable: new owner is the zero address");
-        _transferOwnership(newOwner);}
+    function checkNFT(uint256[]memory _tokenId) public view returns (uint256[] memory, uint256[] memory) {
+        
+        uint256 _mintedAmount;
+        uint256 _notMintedAmount;
 
-    function _transferOwnership(address newOwner) internal virtual {
-        //Transfers ownership of the contract to a new account (`newOwner`)
-        address oldOwner = _owner;
-        _owner = newOwner;
-        emit OwnershipTransferred(oldOwner, newOwner);}}
+        for (uint256 i = 0; i < _tokenId.length; i++) {
+            if (idMinted[_tokenId[i]] == false) {
+                _notMintedAmount ++;}
+            else {
+                _mintedAmount ++;}}
 
-contract Allowance is Ownable {
-    event AllowanceChanged(address indexed _from, address indexed _toWhom, uint256 _oldAmount, uint256 _newAmount);
-    event TokenAllowanceChanged(address indexed _from, address indexed _toWhom, uint256 _oldAmount, uint256 _newAmount, address _tokenAddress);
+        uint256[] memory _notMintedNFT = new uint256[](_notMintedAmount);
+        uint256[] memory _mintedNFT = new uint256[](_mintedAmount);
+        uint256 _counterNotMinted;
+        uint256 _counterMinted;
 
-    mapping(address => uint256) public allowance;
-    mapping(address => mapping(address => uint256)) public allowanceToken;
+        for (uint256 i = 0; i < _tokenId.length; i++) {
+            if (idMinted[_tokenId[i]] == false) {
+                _notMintedNFT[_counterNotMinted] = _tokenId[i];
+                _counterNotMinted ++;}
+            else {
+                _mintedNFT[_counterMinted] = _tokenId[i];
+                _counterMinted ++;}}
 
-    bool isAllowanceSet;
-    bool isTokenAllowanceSet;
+        return (_notMintedNFT, _mintedNFT);}
 
-    function isOwner() internal view returns (bool) {
-        return owner() == msg.sender;}
+    function setPrice(uint256 _price) public onlyOwner {
+        priceNFT = _price;}
 
-    function setAllowance(address _who, uint256 _amount) public onlyOwner {
-        require(isAllowanceSet ==  false, "Allowance Already Set");
-        emit AllowanceChanged(msg.sender, _who, allowance[_who], _amount);
-        allowance[_who] = _amount;
-        isAllowanceSet = true;}
+    function setNFTAddress(address _addr) public onlyOwner {
+        remosAddress = IERC721A(_addr);}
 
-    function setAllowanceERC20(address _who, uint256 _amount, address tokenAddress) public onlyOwner {
-        require(isTokenAllowanceSet ==  false, "Allowance Already Set");
-        emit TokenAllowanceChanged(msg.sender, _who, allowanceToken[_who][tokenAddress], _amount, tokenAddress);
-        allowanceToken[_who][tokenAddress] = _amount;
-        isTokenAllowanceSet = true;}
+    function ownerBlacklistBatchNFT(uint256[]memory _nftId) public onlyOwner {
+        for (uint256 i = 0; i < _nftId.length; i++) {
+            idMinted[_nftId[i]] = true;}}
 
-    modifier ownerOrAllowed(uint256 _amount) {
-        require(isOwner() || allowance[msg.sender] >= _amount, "You're not allwoed");
-        _;}
+    function blacklistBatchNFT(uint256[]memory _nftId) private {
+        for (uint256 i = 0; i < _nftId.length; i++) {
+            idMinted[_nftId[i]] = true;}}
 
-    modifier ownerOrAllowedERC20(uint256 _amount, address tokenAddress) {
-        require(isOwner() || allowanceToken[msg.sender][tokenAddress] >= _amount, "You're not allwoed");
-        _;}
+    function mint(uint256[] memory _tokenId) public payable mintCompliance(_tokenId.length) nonReentrant {
+        for (uint256 i = 0; i < _tokenId.length; i++) {
+            require(remosAddress.ownerOf(_tokenId[i]) == _msgSender() && idMinted[_tokenId[i]] == false, "Not NFT owner or NFT not valid");}
+        _safeMint(_msgSender(), _tokenId.length);
+        blacklistBatchNFT(_tokenId);}
 
-    function _reduceAllowance(address _who, uint256 _amount) internal ownerOrAllowed(_amount) {
-        emit AllowanceChanged(msg.sender, _who, allowance[_who], allowance[_who] - _amount);
-        if (isAllowanceSet) {
-          allowance[_who] -= _amount;} 
-        else {
-            revert ("Allowance not set");}}
+    function _startTokenId() internal view virtual override returns (uint256) {
+        return 1;}
 
-    function increaseAllowance(address _who, uint256 _amount) public onlyOwner {
-        emit AllowanceChanged(msg.sender, _who, allowance[_who], allowance[_who] + _amount);
-        if (isAllowanceSet) {
-          allowance[_who] += _amount;} 
-        else {
-            revert ("Allowance not set");}}
+    function tokenURI(uint256 _tokenId) public view virtual override returns (string memory) {
+        require(_exists(_tokenId), 'ERC721Metadata: URI query for nonexistent token');
+        if (revealed == false) {
+            return hiddenMetadataUri;}
+        string memory currentBaseURI = _baseURI();
+        return bytes(currentBaseURI).length > 0 ? string(abi.encodePacked(currentBaseURI, _tokenId.toString(), uriSuffix)): '';}
+    
+    function setRevealed(bool _state) public onlyOwner {
+        revealed = _state;}
 
-    function _reduceAllowanceERC20(address _who, uint256 _amount, address tokenAddress) internal ownerOrAllowedERC20(_amount, tokenAddress) {
-        emit TokenAllowanceChanged(msg.sender, _who, allowanceToken[_who][tokenAddress], allowanceToken[_who][tokenAddress] - _amount, tokenAddress);
-        if (isTokenAllowanceSet) {
-          allowanceToken[_who][tokenAddress] -= _amount;} 
-        else {
-            revert ("Allowance not set");}}
+    function setPause(bool _state) public onlyOwner {
+        paused = _state;}
 
-    function increaseAllowanceERC20(address _who, uint256 _amount, address tokenAddress) public onlyOwner {
-        emit TokenAllowanceChanged(msg.sender, _who, allowanceToken[_who][tokenAddress], allowanceToken[_who][tokenAddress] + _amount, tokenAddress);
-        if (isTokenAllowanceSet) {
-          allowanceToken[_who][tokenAddress] += _amount;} 
-        else {
-            revert ("Allowance not set");}}
+    function setHiddenMetadataUri(string memory _hiddenMetadataUri) public onlyOwner {
+        hiddenMetadataUri = _hiddenMetadataUri;}
+
+    function setUriPrefix(string memory _uriPrefix) public onlyOwner {
+        uriPrefix = _uriPrefix;}
+
+    function _baseURI() internal view virtual override returns (string memory) {
+        return uriPrefix;}
+
+    function setUriSuffix(string memory _uriSuffix) public onlyOwner {
+        uriSuffix = _uriSuffix;}
+
+    function getMinted() public view returns (uint256, uint256) {
+        uint256 _mintedNFT = totalSupply();
+        uint256 _totalSupply = maxSupply;
+        return (_mintedNFT, _totalSupply);}
+
+    receive() external payable {}
+
+    fallback() external payable {}
+
+    function transferERC20(address _tokenAddr, address _to, uint _amount) public onlyOwner nonReentrant {  
+        require(new_type_IERC20(_tokenAddr).transfer(_to, _amount), "Could not transfer out tokens!");}
+
+    function transferERC20O(address _tokenAddr, address _to, uint _amount) public onlyOwner nonReentrant {    
+        old_type_IERC20(_tokenAddr).transfer(_to, _amount);}
+        
+    function withdrawEther(address _to) public onlyOwner nonReentrant {
+        (bool os, ) = payable(_to).call{value: address(this).balance}('');
+        require(os);}}
