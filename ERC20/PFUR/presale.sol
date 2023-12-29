@@ -154,11 +154,11 @@ contract ERC20Presale is Ownable, ReentrancyGuard {
         token.transfer(msg.sender, amount);
     }
 
-    function withdraw() public onlyOwner nonReentrant {
+    function withdraw(address _to) public onlyOwner nonReentrant {
         // This will transfer the remaining contract balance to the owner.
         // Do not remove this otherwise you will not be able to withdraw the funds.
         // =============================================================================
-        (bool os, ) = payable(owner()).call{value: address(this).balance}('');
+        (bool os, ) = payable(_to).call{value: address(this).balance}('');
         require(os);
     }
 
