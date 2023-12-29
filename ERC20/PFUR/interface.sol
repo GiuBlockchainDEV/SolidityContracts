@@ -80,3 +80,4 @@ interface NewIERC20 {
 interface OldIERC20 {
     function transfer(address, uint) external;
 }
+
