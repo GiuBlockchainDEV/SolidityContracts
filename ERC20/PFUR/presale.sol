@@ -31,16 +31,16 @@ contract ERC20Presale is Ownable, ReentrancyGuard {
     mapping(address => bool) public discounted;
     
     uint256 public privateDecimalsRate = 10 ** 1;
-    uint256 public privateWhitelistRate = 25; //1USD -> 2.5PFUR
+    uint256 public privateWhitelistRate = 25; 
 
     uint256 public publicDecimalsRate = 10 ** 2;
-    uint256 public publicWhitelistRate = 275; //1USD -> 2.75PFUR
+    uint256 public publicWhitelistRate = 275; 
 
     uint256 public constant decimalsDifference = 10 ** 8;
-    uint256 public pulseToUsdRate = 6415; //10*(10**8)
+    uint256 public pulseToUsdRate = 6415; 
      
 
-    uint256 public registrationFee = 1 * (10 ** 18);//100000
+    uint256 public registrationFee = 1 * (10 ** 18);
     uint256 public constant MAX_PUBLIC_WHITELIST_REGISTRATIONS = 299;
     uint256 public publicWhitelistRegistrations;
 
