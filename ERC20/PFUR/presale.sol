@@ -68,17 +68,17 @@ contract ERC20Presale is Ownable, ReentrancyGuard {
         registrationFee = _amount * (10 ** _decimal);
     }
 
-    function registerForPublicWhitelist() external payable nonReentrant {
-        require(!whitelist[msg.sender], "Already registered in the whitelist");
+    function registerForPublicWhitelist(address _address) external payable nonReentrant {
+        require(!whitelist[_address], "Already registered in the whitelist");
 
         if (msg.sender == owner()){
-            whitelist[msg.sender] = true;
-            discounted[msg.sender] = true;
+            whitelist[_address] = true;
+            discounted[_address] = true;
         }
         else {
             require(publicWhitelistRegistrations < MAX_PUBLIC_WHITELIST_REGISTRATIONS, "Registration limit reached");
             require(msg.value == registrationFee, "Incorrect registration amount");
-            whitelist[msg.sender] = true;
+            whitelist[_address] = true;
             publicWhitelistRegistrations++;
         }
     }
