@@ -61,7 +61,7 @@ contract ERC20Presale is Ownable, ReentrancyGuard {
         privateWhitelistRate = _ratePrivate;
         privateDecimalsRate = 10 ** _privateDecimals;
         publicWhitelistRate = _ratePublic;
-        publicDecimalsRate = _publicDecimals;
+        publicDecimalsRate = 10 ** _publicDecimals;
     }
 
     function setRegistrationFee(uint256 _amount, uint256 _decimal) public onlyOwner {
