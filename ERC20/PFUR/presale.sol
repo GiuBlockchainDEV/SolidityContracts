@@ -16,14 +16,11 @@ import "./interface.sol";
 
 contract ERC20Presale is Ownable, ReentrancyGuard {
     IERC20 public token;
-    uint256 public end;
 
     uint256 public tokensSold;
     uint256 public constant maximumSellable = 5 * (10 ** 9) * (10 ** 18);
 
-    bool public started;
-    bool public claimEnabled;
-    bool public enabledForAll;
+    uint256 public presalePhase;
 
     mapping(address => uint256) public tokensToClaim;
 
@@ -40,7 +37,7 @@ contract ERC20Presale is Ownable, ReentrancyGuard {
     uint256 public pulseToUsdRate = 6415; 
      
 
-    uint256 public registrationFee = 1 * (10 ** 18);
+    uint256 public registrationFee = 1;
     uint256 public constant MAX_PUBLIC_WHITELIST_REGISTRATIONS = 299;
     uint256 public publicWhitelistRegistrations;
 
@@ -76,6 +73,7 @@ contract ERC20Presale is Ownable, ReentrancyGuard {
             discounted[_address] = true;
         }
         else {
+            require(presalePhase == 1, "It is not possible to register at this time");
             require(publicWhitelistRegistrations < MAX_PUBLIC_WHITELIST_REGISTRATIONS, "Registration limit reached");
             require(msg.value == registrationFee, "Incorrect registration amount");
             whitelist[_address] = true;
@@ -83,36 +81,27 @@ contract ERC20Presale is Ownable, ReentrancyGuard {
         }
     }
 
-    //Set true to activate it, dafault value is false
-    function startPresale(bool _state) public onlyOwner {
-        started = _state;
-    }
+    //Phase 0 Whitelist -> Sole Proprietor
+    //Phase 1 Whitelist -> Public Demand
+    //Stage 2 Buy -> All Whitelist users
+    //Stage 3 Open Sale
+    //Stage 4 Claim
+    //Stage 5 Stop Sale
 
     //Set true to activate it, dafault value is false
-    function enableClaim(bool _state, uint256 _days) public onlyOwner {
-        setDuration(_days);
-        claimEnabled = _state;
-    }
-
-    function enableAll(bool _state) public onlyOwner {
-        enabledForAll = _state;
-    }
-
-    function setDuration(uint256 _days) public onlyOwner returns(uint256) {
-        end = block.timestamp + (_days * 86400);
-        return block.timestamp;
-    }
+    function setPresaleState(uint256 _phase) public onlyOwner {
+        presalePhase = _phase;
+    } 
 
     function buyTokens() external payable nonReentrant {
-        require(started, "Presale not started");
-        require(block.timestamp < end, "Presale finished");
         require(msg.value > 0, "You have to send PLS");
+        require(presalePhase > 1 && presalePhase < 5, "It is not possible to purchase tokens at this time");
 
         uint256 rate;
         uint256 decimal;
 
-        if (!enabledForAll) {
-            require(whitelist[msg.sender], "Non registered user");
+        if (presalePhase < 3) {
+            require(whitelist[msg.sender], "Not registered user");
 
             if (discounted[msg.sender]) {
                 rate = privateWhitelistRate;
@@ -146,7 +135,7 @@ contract ERC20Presale is Ownable, ReentrancyGuard {
     }
 
     function claimTokens() external nonReentrant {
-        require(claimEnabled, "Claim not yet enabled");
+        require(presalePhase == 4, "Claim not yet enabled");
         uint256 amount = tokensToClaim[msg.sender];
         require(amount > 0, "No tokens to redeem");
 
