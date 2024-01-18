@@ -26,7 +26,8 @@ contract ERC20Presale is Ownable, ReentrancyGuard {
 
     mapping(address => bool) public whitelist;
     mapping(address => bool) public discounted;
-    
+    mapping(address => uint256) public pulseUsed;
+
     uint256 public privateDecimalsRate = 0;
     uint256 public privateWhitelistRate = 19825; //2.5$
 
@@ -35,6 +36,7 @@ contract ERC20Presale is Ownable, ReentrancyGuard {
 
     uint256 public registrationFee = 1;
     uint256 public constant MAX_PUBLIC_WHITELIST_REGISTRATIONS = 299;
+    uint256 public maxPulse = 30000000 * (10**18);
     uint256 public publicWhitelistRegistrations;
 
     constructor() {
@@ -60,6 +62,10 @@ contract ERC20Presale is Ownable, ReentrancyGuard {
 
     function setRegistrationFee(uint256 _amount, uint256 _decimal) public onlyOwner {
         registrationFee = _amount * (10 ** _decimal);
+    }
+
+    function setMaxPulse(uint256 _amount, uint256 _decimal) public onlyOwner {
+        maxPulse = _amount * (10 ** _decimal);
     }
 
     function registerForPublicWhitelist(address _address) external payable nonReentrant {
@@ -93,11 +99,13 @@ contract ERC20Presale is Ownable, ReentrancyGuard {
     function buyTokens() external payable nonReentrant {
         require(msg.value > 0, "You have to send PLS");
         require(presalePhase > 1 && presalePhase < 5, "It is not possible to purchase tokens at this time");
-
+        
         uint256 _rate;
         uint256 _decimal;
         uint256 _amount = msg.value;
         uint256 _level;
+
+        require((_amount + pulseUsed[msg.sender]) <= maxPulse, "Maximum reached");
 
         if (presalePhase < 3) {
             require(whitelist[msg.sender], "Not registered user");
@@ -133,6 +141,7 @@ contract ERC20Presale is Ownable, ReentrancyGuard {
         uint256 _furioAmount = calculatePulseFurioAmountWei(_amount, _level);
         require(tokensSold + _furioAmount <= maximumSellable, "Sales limit exceeded");
         tokensSold += _furioAmount;
+        pulseUsed[msg.sender] += _amount;
         tokensToClaim[msg.sender] += _furioAmount;
     }
 
