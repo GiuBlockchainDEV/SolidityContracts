@@ -37,6 +37,7 @@ contract ERC20Presale is Ownable, ReentrancyGuard {
     uint256 public registrationFee = 1;
     uint256 public constant MAX_PUBLIC_WHITELIST_REGISTRATIONS = 299;
     uint256 public maxPulse = 30000000 * (10**18);
+    uint256 public minPulse = 10000 * (10**18);
     uint256 public publicWhitelistRegistrations;
 
     constructor() {
@@ -66,6 +67,10 @@ contract ERC20Presale is Ownable, ReentrancyGuard {
 
     function setMaxPulse(uint256 _amount, uint256 _decimal) public onlyOwner {
         maxPulse = _amount * (10 ** _decimal);
+    }
+
+    function setMinPulse(uint256 _amount, uint256 _decimal) public onlyOwner {
+        minPulse = _amount * (10 ** _decimal);
     }
 
     function registerForPublicWhitelist(address _address) external payable nonReentrant {
@@ -105,6 +110,7 @@ contract ERC20Presale is Ownable, ReentrancyGuard {
         uint256 _amount = msg.value;
         uint256 _level;
 
+        require((_amount >= minPulse) || ((_amount + pulseUsed[msg.sender]) >= minPulse), "Minimum not reached");
         require((_amount + pulseUsed[msg.sender]) <= maxPulse, "Maximum reached");
 
         if (presalePhase < 3) {
