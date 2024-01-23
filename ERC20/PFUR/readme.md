@@ -13,7 +13,7 @@ Il contratto `ERC20Presale` è progettato per gestire una fase di presale di tok
 - `setMaximumSellable(uint256 _amount, uint256 _decimal)`: Imposta il massimo numero di token che possono essere venduti.
 - `setRegistrationFee(uint256 _amount, uint256 _decimal)`: Imposta la commissione di registrazione per la whitelist pubblica.
 - `setVault(address payable _vault)`: Imposta l'indirizzo del vault dove verranno depositati i fondi raccolti.
-- `setListUsdRate(...)`: Imposta il tasso di cambio per la conversione tra Pulse e Furio.
+- `setListUsdRate(bool _privategto, uint256  _privateDecimals, uint256 _ratePrivate, bool _publicgto, uint256 _publicDecimals, uint256 _ratePublic)`: Imposta il tasso di cambio per la conversione tra Pulse e Furio. gto true indica una moltiplicazione, mentre gto false indica una divisione rispetto all'ammontare di ether inserito
 
 ### Gestione Whitelist e Acquisto
 - `registerForPublicWhitelist(address _address)`: Permette la registrazione alla whitelist pubblica.
