@@ -16,6 +16,7 @@ import "./interface.sol";
 
 contract ERC20Presale is Ownable, ReentrancyGuard {
     IERC20 public token;
+    address payable public vault;
 
     uint256 public tokensSold;
     uint256 public maximumSellable = 5 * (10 ** 9) * (10 ** 18);
@@ -23,14 +24,15 @@ contract ERC20Presale is Ownable, ReentrancyGuard {
     uint256 public presalePhase;
 
     mapping(address => uint256) public tokensToClaim;
-
     mapping(address => bool) public whitelist;
     mapping(address => bool) public discounted;
     mapping(address => uint256) public pulseUsed;
 
+    bool public privategto;
     uint256 public privateDecimalsRate = 0;
     uint256 public privateWhitelistRate = 19825; //2.5$
 
+    bool public publicgto;
     uint256 public publicDecimalsRate = 0;
     uint256 public publicWhitelistRate = 21815; //2.75$ 
 
@@ -48,29 +50,37 @@ contract ERC20Presale is Ownable, ReentrancyGuard {
         token = IERC20(_token);
     }
         
-    function setMaximumSellable(uint256 _amount, uint256 _decimal) public onlyOwner {
-        maximumSellable = _amount * (10 ** _decimal);
-    }
-
-    //From https://www.coingecko.com/it/monete/pulsechain 
-    //Get the pulse value corresponding in $ to the desired amount for both public and private
-    function setListUsdRate(uint256  _privateDecimals, uint256 _ratePrivate, uint256 _publicDecimals, uint256 _ratePublic) public onlyOwner {
-        privateWhitelistRate = _ratePrivate;
-        privateDecimalsRate = 10 ** _privateDecimals;
-        publicWhitelistRate = _ratePublic;
-        publicDecimalsRate = 10 ** _publicDecimals;
-    }
-
-    function setRegistrationFee(uint256 _amount, uint256 _decimal) public onlyOwner {
-        registrationFee = _amount * (10 ** _decimal);
+    function setMinPulse(uint256 _amount, uint256 _decimal) public onlyOwner {
+        minPulse = _amount * (10 ** _decimal);
     }
 
     function setMaxPulse(uint256 _amount, uint256 _decimal) public onlyOwner {
         maxPulse = _amount * (10 ** _decimal);
     }
 
-    function setMinPulse(uint256 _amount, uint256 _decimal) public onlyOwner {
-        minPulse = _amount * (10 ** _decimal);
+    function setMaximumSellable(uint256 _amount, uint256 _decimal) public onlyOwner {
+        maximumSellable = _amount * (10 ** _decimal);
+    }
+
+    function setRegistrationFee(uint256 _amount, uint256 _decimal) public onlyOwner {
+        registrationFee = _amount * (10 ** _decimal);
+    }
+
+    function setVault(address payable _vault) public onlyOwner {
+        vault = _vault;
+    }
+
+    //From https://www.coingecko.com/it/monete/pulsechain 
+    //Get the pulse value corresponding in $ to the desired amount for both public and private
+    //GTO true -> mul | GTO false -> div
+    function setListUsdRate(bool _privategto, uint256  _privateDecimals, uint256 _ratePrivate, bool _publicgto, uint256 _publicDecimals, uint256 _ratePublic) public onlyOwner {
+        privategto = _privategto;
+        privateWhitelistRate = _ratePrivate;
+        privateDecimalsRate = _privateDecimals;
+        
+        publicgto = _publicgto;
+        publicWhitelistRate = _ratePublic;
+        publicDecimalsRate = _publicDecimals;
     }
 
     function registerForPublicWhitelist(address _address) external payable nonReentrant {
@@ -86,6 +96,7 @@ contract ERC20Presale is Ownable, ReentrancyGuard {
             require(msg.value == registrationFee, "Incorrect registration amount");
             whitelist[_address] = true;
             publicWhitelistRegistrations++;
+            vault.transfer(msg.value);
         }
     }
 
@@ -95,8 +106,6 @@ contract ERC20Presale is Ownable, ReentrancyGuard {
     //Stage 3 Open Sale
     //Stage 4 Claim
     //Stage 5 Stop Sale
-
-    //Set true to activate it, dafault value is false
     function setPresaleState(uint256 _phase) public onlyOwner {
         presalePhase = _phase;
     } 
@@ -149,25 +158,37 @@ contract ERC20Presale is Ownable, ReentrancyGuard {
         tokensSold += _furioAmount;
         pulseUsed[msg.sender] += _amount;
         tokensToClaim[msg.sender] += _furioAmount;
+        vault.transfer(msg.value);
     }
 
     function calculateFurio(uint256 _amountPulse, uint256 _decimalsPulse, uint256 _levelWhitelist) public view returns (uint256) {
         uint256 _pulseAmountWei = _amountPulse * (10 ** _decimalsPulse);  
         uint256 _rate;
         uint256 _decimalsRate;
+        bool _gto;
+        uint256 _pulseFurioAmount;
 
-        if(_levelWhitelist == 0){
+        if (_levelWhitelist == 0){
             _rate = privateWhitelistRate;
             _decimalsRate = privateDecimalsRate;
+            _gto = privategto;
         }
         
-        else{
+        else {
             _rate = publicWhitelistRate;
             _decimalsRate = publicDecimalsRate;
+            _gto = publicgto;
         }
 
-        uint256 _pulseFurioAmount = _pulseAmountWei / (_rate * (10 ** _decimalsRate));
-        _pulseFurioAmount = _pulseFurioAmount / (10 ** _decimalsPulse);
+        if (_gto) {
+            _pulseFurioAmount = _pulseAmountWei * _rate;
+        } 
+
+        else {
+            _pulseFurioAmount = _pulseAmountWei / _rate ;
+        }
+        
+         _pulseFurioAmount = _pulseFurioAmount / (10 ** _decimalsRate);
         return _pulseFurioAmount;
     }
 
@@ -175,19 +196,32 @@ contract ERC20Presale is Ownable, ReentrancyGuard {
     function calculatePulseFurioAmountWei(uint256 _pulseAmountWei, uint256 _levelWhitelist) public view returns (uint256) {
         uint256 _rate;
         uint256 _decimalsRate;
+        bool _gto;
+        uint256 _pulseFurioAmount;
 
-        if(_levelWhitelist == 0){
+        if (_levelWhitelist == 0){
             _rate = privateWhitelistRate;
             _decimalsRate = privateDecimalsRate;
+            _gto = privategto;
         }
-
-        else{
+        
+        else {
             _rate = publicWhitelistRate;
             _decimalsRate = publicDecimalsRate;
+            _gto = publicgto;
         }
+        
+        if (_gto) {
+            _pulseFurioAmount = _pulseAmountWei * _rate;
+        } 
 
-        uint256 _pulseFurioAmount = _pulseAmountWei / (_rate * (10 ** _decimalsRate));
-        return _pulseFurioAmount;}
+        else {
+            _pulseFurioAmount = _pulseAmountWei / _rate ;
+        }
+        
+         _pulseFurioAmount = _pulseFurioAmount / (10 ** _decimalsRate);
+        return _pulseFurioAmount;
+    }
 
     function claimTokens() external nonReentrant {
         require(presalePhase == 4, "Claim not yet enabled");
