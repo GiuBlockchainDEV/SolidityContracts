@@ -37,7 +37,7 @@ contract ERC20Presale is Ownable, ReentrancyGuard {
     uint256 public publicWhitelistRate = 21815; //2.75$ 
 
     uint256 public registrationFee = 1;
-    uint256 public constant MAX_PUBLIC_WHITELIST_REGISTRATIONS = 299;
+    uint256 public MAX_PUBLIC_WHITELIST_REGISTRATIONS = 299;
     uint256 public maxPulse = 30000000 * (10**18);
     uint256 public minPulse = 10000 * (10**18);
     uint256 public publicWhitelistRegistrations;
@@ -68,6 +68,10 @@ contract ERC20Presale is Ownable, ReentrancyGuard {
 
     function setVault(address payable _vault) public onlyOwner {
         vault = _vault;
+    }
+
+    function setMaxUser(uint256 _user) public onlyOwner {
+        MAX_PUBLIC_WHITELIST_REGISTRATIONS = _user;
     }
 
     //From https://www.coingecko.com/it/monete/pulsechain 
