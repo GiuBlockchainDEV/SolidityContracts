@@ -4,7 +4,7 @@ Welcome to my Solidity GitHub repository! Here, you'll find a collection of smar
 
 ## About Me
 
-I'm Giudev.eth, a passionate backend/blockchain developer with a strong focus on innovation and efficiency in development processes. My experience spans across several roles, including CTO at Forint Finance ltd, where I've spearheaded cross-chain payment gateway processing and smart contract development, and Blockchain Dev at Besteam Game srl, focusing on implementing blockchain technology in gaming platforms.
+I'm Giudev.eth, a passionate backend/blockchain developer with a strong focus on innovation and efficiency in development processes. My experience spans across several roles, including CPO at Forint Finance ltd, where I've spearheaded cross-chain payment gateway processing and smart contract development, and Blockchain Dev at Besteam Game srl, focusing on implementing blockchain technology in gaming platforms.
 
 ### Skills
 
@@ -14,7 +14,7 @@ I'm Giudev.eth, a passionate backend/blockchain developer with a strong focus on
 
 ### Experience
 
-- **CTO at Forint Finance ltd** - Innovating development processes and managing smart contract development.
+- **CPO at Forint Finance ltd** - Innovating development processes and managing smart contract development.
 - **Blockchain Dev at Besteam Game srl** - Streamlining gaming platform distribution through blockchain technology.
 - **Head of Innovation at Growa.ai** - Your other experiences here.
 
