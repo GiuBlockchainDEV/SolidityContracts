@@ -1,5 +1,30 @@
-# GIULIANO NERONI
+# Solidity Contracts
 
-<img src="https://static.wixstatic.com/media/f47e49_6330ba2054fd4b0d97926cae797ea07a~mv2.png/v1/crop/x_3,y_0,w_402,h_500/fill/w_280,h_280,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/Modulo%20IA%20(11).png" width="128"/>
+Welcome to my Solidity GitHub repository! Here, you'll find a collection of smart contracts and blockchain projects I've developed, showcasing my expertise in Solidity, along with other programming skills in Python, C++, and JavaScript.
 
-EXPERIENCED AND RESULTS-ORIENTED BACK-END DEVELOPER WITH A DEEP PASSION FOR THE JOB AND A SIGNIFICANT BACKGROUN THANK TO STUDIES UNDERTAKEN AT THE FACULTY OF INDUSTRIAL ENGINEERING. OFFERING A STRONG ATTENTION TO DETAIL AND ACCURACY, EXCELLENT PROBLEM-SOLVING SKILLS, AND THE IMPORTANT ABILITY TO WORK IN FAST-PACED TEAM ENVIRONMENTS. A RELIABLE INDIVIDUAL WITH DETERMINATION TO MEET AND EXCEED ALL ASSIGNED TARGETS.
+## About Me
+
+I'm Giudev.eth, a passionate backend/blockchain developer with a strong focus on innovation and efficiency in development processes. My experience spans across several roles, including CTO at Forint Finance ltd, where I've spearheaded cross-chain payment gateway processing and smart contract development, and Blockchain Dev at Besteam Game srl, focusing on implementing blockchain technology in gaming platforms.
+
+### Skills
+
+- **Programming:** Solidity, Python, C++, JavaScript, MySQL
+- **Blockchain:** Smart contract development, cross-chain payment solutions
+- **Management:** Team coordination, development strategies, operational flow diagrams
+
+### Experience
+
+- **CTO at Forint Finance ltd** - Innovating development processes and managing smart contract development.
+- **Blockchain Dev at Besteam Game srl** - Streamlining gaming platform distribution through blockchain technology.
+- **Head of Innovation at Growa.ai** - Your other experiences here.
+
+### Education
+
+- **California Institute of Technology** - Blockchain bootcamp, specializing as a Blockchain Consultant and Developer.
+- **LearnWeb3** - AI Developer Degree, focusing on Machine Learning, Deep Learning, and NLP.
+
+## Contact
+
+- **LinkedIn:** [giuliano-neroni-901217151](https://www.linkedin.com/in/giuliano-neroni-901217151/)
+
+Feel free to reach out if you have any questions or are interested in collaborating on a project!
