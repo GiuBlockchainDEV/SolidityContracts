@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-// Import the staking interface and the token contract
-import "./interface.sol";
+// Import the token contract
+import "./contract.sol";
 
 /**
  * @title MedreToken
