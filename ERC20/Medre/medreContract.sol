@@ -5,13 +5,13 @@ pragma solidity ^0.8.24;
 import "./interface.sol";
 
 /**
- * @title MedreStaking
+ * @title MedreToken
  * @dev Implements staking functionality for the Mediterranean Real Estate Token (MEDRE).
  * The contract inherits from ReentrancyGuard to prevent reentrancy attacks,
  * Ownable for ownership management, ERC20 for standard token functionality,
  * and ERC20Burnable for token burning capabilities.
  */
-contract MedreStaking is ReentrancyGuard, Ownable, ERC20, ERC20Burnable {
+contract MedreToken is ReentrancyGuard, Ownable, ERC20, ERC20Burnable {
 
     string private name_ = "Mediterranean Real Estate Token"; // Name of the token
     string private symbol_ = "MEDRE"; // Symbol of the token
