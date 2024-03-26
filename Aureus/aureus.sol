@@ -62,7 +62,7 @@ contract aureus is ERC721A, Ownable, ReentrancyGuard {
     uint256 public constant shardID = 0;
 
     function swapAureus (uint256 _amount) public nonReentrant {
-        require(!paused, "Il contratto e' in pausa");
+        require(!paused, "Il contratto e in pausa");
         require((tokenSwapped + _amount) <= aureusSupply, "Aureus terminati");
         uint256 shardAmount = _amount * 5;
         uint256 balance = shardAddress.balanceOf(msg.sender, shardID);
