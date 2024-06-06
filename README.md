@@ -14,9 +14,9 @@ I'm Giudev.eth, a passionate backend/blockchain developer with a strong focus on
 
 ### Experience
 
-- **CPO at Forint Finance ltd** - Innovating development processes and managing smart contract development.
+- **Head of Innovation at Forint Finance ltd** - Innovating development processes and managing smart contract development.
+- **Head of Innovation at Growa.ai** - AI and Blockchain oracle.
 - **Blockchain Dev at Besteam Game srl** - Streamlining gaming platform distribution through blockchain technology.
-- **Head of Innovation at Growa.ai** - Your other experiences here.
 
 ### Education
 
