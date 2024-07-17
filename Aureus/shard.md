@@ -5,6 +5,7 @@ Questa è un'implementazione frontend per il contratto ShardNFT utilizzando Reac
 ## Sommario
 
 - [Configurazione iniziale](#configurazione-iniziale)
+- [Variabili in lettura](#variabili-in-lettura)
 - [Funzioni di lettura](#funzioni-di-lettura)
 - [Funzioni di scrittura](#funzioni-di-scrittura)
 - [Funzioni amministrative](#funzioni-amministrative)
@@ -48,7 +49,11 @@ uint256 public constant MAX_SUPPLY = 25000;
 uint256 public constant MAX_MINT_PER_TX = 5;
 uint256 public totalMinted = 0;
 ```
-*currentPrice* prezzo di una shard in GPB*100
+**currentPrice** prezzo di una shard in GPB*100
+**MAX_SUPPLY** supply massima delle shard
+**MAX_MINT_PER_TX** massimo ammontare di shrd acquistabili in una transazione
+**totalMinted** totale shard mintate
+
 
 ## Funzioni di lettura
 
