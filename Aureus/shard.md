@@ -235,7 +235,7 @@ function SetPrice() {
   )
 }
 ```
-### withdraw e recoverERC20
+### withdraw
 ```solidity
 //Questo funzione permette di ritirare i fondi ETH dal contratto, è chiamabile solo dall'owner
 function withdraw() external onlyOwner nonReentrant {
@@ -245,6 +245,7 @@ function withdraw() external onlyOwner nonReentrant {
         require(success, "Withdrawal failed");
     }
 ```
+### recoverERC20
 ```solidity
 //Questo funzione permette di ritirare i fondi ERC20 dl contratto, è chiamabile solo dall'owner
 function recoverERC20(address tokenAddress, uint256 tokenAmount) external onlyOwner {
