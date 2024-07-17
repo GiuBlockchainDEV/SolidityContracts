@@ -45,24 +45,17 @@ Questa configurazione inizializza Wagmi per interagire con la mainnet Ethereum u
 
 ```solidity
 uint256 public currentPrice;
-// currentPrice
-// prezzo di una shard in GPB*100
+//  prezzo di una shard in GPB*100
 
 uint256 public constant MAX_SUPPLY = 25000;
+//  supply massima delle shard
+
 uint256 public constant MAX_MINT_PER_TX = 5;
+//  massimo ammontare di shrd acquistabili in una transazione
+
 uint256 public totalMinted = 0;
+//  totale shard mintate
 ```
-### currentPrice
-prezzo di una shard in GPB*100
-
-### MAX_SUPPLY
-supply massima delle shard
-
-### MAX_MINT_PER_TX
-massimo ammontare di shrd acquistabili in una transazione
-
-### totalMinted
-totale shard mintate
 
 ## Funzioni di lettura
 
