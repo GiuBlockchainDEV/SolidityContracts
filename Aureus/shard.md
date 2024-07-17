@@ -48,6 +48,7 @@ uint256 public constant MAX_SUPPLY = 25000;
 uint256 public constant MAX_MINT_PER_TX = 5;
 uint256 public totalMinted = 0;
 ```
+*currentPrice* prezzo di una shard in GPB*100
 
 ## Funzioni di lettura
 
