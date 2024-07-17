@@ -102,6 +102,24 @@ function SupplyInfo() {
 
 ### getEthPrice
 
+```solidity
+//Questo componente mostra il valore in GBP*100 in wei di ETH
+unction getEthPrice(uint256 penceAmount) public view returns (uint256) {
+        (, int256 ethUsdPrice,,,) = ethUsdPriceFeed.latestRoundData();
+        (, int256 gbpUsdPrice,,,) = gbpUsdPriceFeed.latestRoundData();
+        require(ethUsdPrice > 0 && gbpUsdPrice > 0, "Invalid price");
+        
+        uint256 ethPerUsd = uint256(ethUsdPrice); // 8 decimals
+        uint256 gbpPerUsd = uint256(gbpUsdPrice); // 8 decimals
+        
+        uint256 numerator = penceAmount * 1e18;
+        numerator = numerator * gbpPerUsd;
+        uint256 denominator = ethPerUsd * 100;
+        
+        return numerator / denominator;
+    }
+```
+
 Questo componente permette agli utenti di inserire un importo in GBP * 100 e vedere il corrispondente prezzo in ETH. Utilizza useContractRead con l'importo in pence come argomento per chiamare la funzione getEthPrice del contratto.
 
 ```javascript
@@ -149,7 +167,29 @@ Questo componente utilizza useAccount per ottenere l'indirizzo del wallet connes
 
 ### mintShard
 
-Questo componente gestisce il processo di minting. Utilizza usePrepareContractWrite per preparare la transazione, useContractWrite per eseguirla, e useWaitForTransaction per monitorarne lo stato. L'utente può specificare la quantità di Shard da mintare. La funzione è payable quindi prma bisogna chiamare prin
+```solidity
+//Questo funzione payable permette di mintare fino a 5 shard a transazione
+function mintShard(uint256 amount) external payable nonReentrant whenNotPaused {
+        require(amount > 0 && amount <= MAX_MINT_PER_TX, "Invalid amount");
+        require(totalMinted + amount <= MAX_SUPPLY, "Exceeds max supply");
+
+        uint256 priceInEth = getEthPrice(currentPrice * amount);
+        require(msg.value >= priceInEth, "Insufficient payment");
+        
+        _mint(msg.sender, 0, amount, "");
+        totalMinted += amount;
+        
+        // Refund excess payment
+        if(msg.value > priceInEth) {
+            (bool success, ) = payable(msg.sender).call{value: msg.value - priceInEth}("");
+            require(success, "Refund failed");
+        }
+
+        emit ShardsMinted(msg.sender, amount);
+    }
+```
+
+Questo componente gestisce il processo di minting. Utilizza usePrepareContractWrite per preparare la transazione, useContractWrite per eseguirla, e useWaitForTransaction per monitorarne lo stato. L'utente può specificare la quantità di Shard da mintare. La funzione è payable quindi prma bisogna chiamare **currentPrice** e poi passrlo per la funzione **getEthPrice**
 
 ```javascript
 MintShard() {
