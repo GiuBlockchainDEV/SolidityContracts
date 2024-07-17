@@ -61,7 +61,19 @@ uint256 public totalMinted = 0;
 
 ### totalSupply e remainingSupply
 
-Questo componente mostra il numero totale di Shard NFT emessi e quanti possono ancora essere mintati.
+```solidity
+function totalSupply() public view returns (uint256) {
+        return totalMinted;
+    }
+//  Questo componente mostra il numero totale di Shard NFT emessi
+
+function remainingSupply() public view returns (uint256) {
+        return MAX_SUPPLY - totalMinted;
+    }
+//  Questo componente mostra il numero totale di Shard NFT rimamenti da mintare
+
+```
+
 La funzione totalSupply del contratto viene chiamata usando l'hook useContractRead di Wagmi. Il risultato viene visualizzato direttamente nell'interfaccia utente, mostrando il numero totale di Shard NFT in circolazione.
 Simile a totalSupply, remainingSupply utilizza useContractRead per ottenere il numero rimanente di Shard NFT che possono essere mintati. Questo aiuta gli utenti a capire la scarsità attuale del token.
 
