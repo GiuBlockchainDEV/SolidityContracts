@@ -1,16 +1,12 @@
 # ShardNFT Frontend Interface
 Questa è un'implementazione frontend per il contratto ShardNFT utilizzando React e Wagmi per l'interazione con la blockchain Ethereum.
-
 ## Sommario
-
 - [Configurazione iniziale](#configurazione-iniziale)
 - [Variabili in lettura](#variabili-in-lettura)
 - [Funzioni di lettura](#funzioni-di-lettura)
 - [Funzioni di scrittura](#funzioni-di-scrittura)
 - [Funzioni amministrative](#funzioni-amministrative)
-
 ## Configurazione iniziale
-
 Per iniziare, configura Wagmi nel tuo progetto React:
 ```javascript
 import { createConfig, configureChains, mainnet } from 'wagmi'
@@ -38,9 +34,7 @@ function App() {
 }
 ```
 Questa configurazione inizializza Wagmi per interagire con la mainnet Ethereum usando MetaMask come connettore principale.
-
 ## Variabili in lettura
-
 ```solidity
 //Prezzo di una shard in GPB*100
 uint256 public currentPrice;
@@ -54,9 +48,7 @@ uint256 public constant MAX_MINT_PER_TX = 5;
 //Totale shard mintate
 uint256 public totalMinted = 0;
 ```
-
 ## Funzioni di lettura
-
 ### totalSupply e remainingSupply
 ```solidity
 //Questo componente mostra il numero totale di Shard NFT emessi
@@ -94,7 +86,6 @@ function SupplyInfo() {
   )
 }
 ```
-
 ### getEthPrice
 ```solidity
 //Questo componente mostra il valore in GBP*100 in wei di ETH
@@ -136,7 +127,6 @@ function PriceInfo() {
   )
 }
 ```
-
 ### balanceOf
 Questo componente utilizza useAccount per ottenere l'indirizzo del wallet connesso e poi useContractRead per chiamare balanceOf. Mostra il saldo di Shard NFT dell'utente corrente.
 ```javascript
@@ -152,9 +142,7 @@ Questo componente utilizza useAccount per ottenere l'indirizzo del wallet connes
   return <p>Your Shard balance: {balance?.toString()}</p>
 }
 ```
-
 ## Funzioni di scrittura
-
 ### mintShard
 ```solidity
 //Questo funzione payable permette di mintare fino a 5 shard a transazione
@@ -212,9 +200,7 @@ MintShard() {
   )
 }
 ```
-
 ## Funzioni amministrative
-
 ### setPrice
 ```solidity
 //Questo funzione payable permette di fissare il prezzo in GBP*100
@@ -249,7 +235,6 @@ function SetPrice() {
   )
 }
 ```
-
 ### withdraw e recoverERC20
 ```solidity
 //Questo funzione permette di ritirare i fondi ETH dal contratto, è chiamabile solo dall'owner
