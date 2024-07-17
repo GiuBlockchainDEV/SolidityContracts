@@ -40,9 +40,22 @@ function App() {
 ```
 Questa configurazione inizializza Wagmi per interagire con la mainnet Ethereum usando MetaMask come connettore principale.
 
+## Variabili in lettura
+
+```solidity
+uint256 public currentPrice;
+uint256 public constant MAX_SUPPLY = 25000;
+uint256 public constant MAX_MINT_PER_TX = 5;
+uint256 public totalMinted = 0;
+```
+
 ## Funzioni di lettura
 
 ### totalSupply e remainingSupply
+
+Questo componente mostra il numero totale di Shard NFT emessi e quanti possono ancora essere mintati.
+La funzione totalSupply del contratto viene chiamata usando l'hook useContractRead di Wagmi. Il risultato viene visualizzato direttamente nell'interfaccia utente, mostrando il numero totale di Shard NFT in circolazione.
+Simile a totalSupply, remainingSupply utilizza useContractRead per ottenere il numero rimanente di Shard NFT che possono essere mintati. Questo aiuta gli utenti a capire la scarsità attuale del token.
 
 ```javascript
 function SupplyInfo() {
@@ -66,9 +79,10 @@ function SupplyInfo() {
   )
 }
 ```
-Questo componente mostra il numero totale di Shard NFT emessi e quanti possono ancora essere mintati.
 
 ### getEthPrice
+
+Questo componente permette agli utenti di inserire un importo in GBP * 100 e vedere il corrispondente prezzo in ETH. Utilizza useContractRead con l'importo in pence come argomento per chiamare la funzione getEthPrice del contratto.
 
 ```javascript
 function PriceInfo() {
@@ -92,9 +106,10 @@ function PriceInfo() {
   )
 }
 ```
-Questo componente permette agli utenti di calcolare il prezzo in ETH per un dato importo in pence.
 
 ### balanceOf
+
+Questo componente utilizza useAccount per ottenere l'indirizzo del wallet connesso e poi useContractRead per chiamare balanceOf. Mostra il saldo di Shard NFT dell'utente corrente.
 
 ```javascript
  UserBalance() {
@@ -109,11 +124,12 @@ Questo componente permette agli utenti di calcolare il prezzo in ETH per un dato
   return <p>Your Shard balance: {balance?.toString()}</p>
 }
 ```
-Questo componente mostra il saldo di Shard NFT dell'utente corrente.
 
 ## Funzioni di scrittura
 
 ### mintShard
+
+Questo componente gestisce il processo di minting. Utilizza usePrepareContractWrite per preparare la transazione, useContractWrite per eseguirla, e useWaitForTransaction per monitorarne lo stato. L'utente può specificare la quantità di Shard da mintare. La funzione è payable quindi prma bisogna chiamare prin
 
 ```javascript
 MintShard() {
@@ -149,7 +165,6 @@ MintShard() {
   )
 }
 ```
-Questo componente permette agli utenti di mintare nuovi Shard NFT.
 
 ## Funzioni amministrative
 
