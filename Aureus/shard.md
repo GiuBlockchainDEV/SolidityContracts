@@ -1,5 +1,4 @@
 # ShardNFT Frontend Interface
-
 Questa è un'implementazione frontend per il contratto ShardNFT utilizzando React e Wagmi per l'interazione con la blockchain Ethereum.
 
 ## Sommario
@@ -13,7 +12,6 @@ Questa è un'implementazione frontend per il contratto ShardNFT utilizzando Reac
 ## Configurazione iniziale
 
 Per iniziare, configura Wagmi nel tuo progetto React:
-
 ```javascript
 import { createConfig, configureChains, mainnet } from 'wagmi'
 import { publicProvider } from 'wagmi/providers/public'
@@ -60,7 +58,6 @@ uint256 public totalMinted = 0;
 ## Funzioni di lettura
 
 ### totalSupply e remainingSupply
-
 ```solidity
 //Questo componente mostra il numero totale di Shard NFT emessi
 function totalSupply() public view returns (uint256) {
@@ -73,10 +70,8 @@ function remainingSupply() public view returns (uint256) {
         return MAX_SUPPLY - totalMinted;
     }
 ```
-
 La funzione totalSupply del contratto viene chiamata usando l'hook useContractRead di Wagmi. Il risultato viene visualizzato direttamente nell'interfaccia utente, mostrando il numero totale di Shard NFT in circolazione.
 Simile a totalSupply, remainingSupply utilizza useContractRead per ottenere il numero rimanente di Shard NFT che possono essere mintati. Questo aiuta gli utenti a capire la scarsità attuale del token.
-
 ```javascript
 function SupplyInfo() {
   const { data: totalSupply } = useContractRead({
@@ -101,7 +96,6 @@ function SupplyInfo() {
 ```
 
 ### getEthPrice
-
 ```solidity
 //Questo componente mostra il valore in GBP*100 in wei di ETH
 unction getEthPrice(uint256 penceAmount) public view returns (uint256) {
@@ -119,9 +113,7 @@ unction getEthPrice(uint256 penceAmount) public view returns (uint256) {
         return numerator / denominator;
     }
 ```
-
 Questo componente permette agli utenti di inserire un importo in GBP * 100 e vedere il corrispondente prezzo in ETH. Utilizza useContractRead con l'importo in pence come argomento per chiamare la funzione getEthPrice del contratto.
-
 ```javascript
 function PriceInfo() {
   const [penceAmount, setPenceAmount] = useState('1000')
@@ -146,9 +138,7 @@ function PriceInfo() {
 ```
 
 ### balanceOf
-
 Questo componente utilizza useAccount per ottenere l'indirizzo del wallet connesso e poi useContractRead per chiamare balanceOf. Mostra il saldo di Shard NFT dell'utente corrente.
-
 ```javascript
  UserBalance() {
   const { address } = useAccount()
@@ -166,7 +156,6 @@ Questo componente utilizza useAccount per ottenere l'indirizzo del wallet connes
 ## Funzioni di scrittura
 
 ### mintShard
-
 ```solidity
 //Questo funzione payable permette di mintare fino a 5 shard a transazione
 function mintShard(uint256 amount) external payable nonReentrant whenNotPaused {
@@ -188,9 +177,7 @@ function mintShard(uint256 amount) external payable nonReentrant whenNotPaused {
         emit ShardsMinted(msg.sender, amount);
     }
 ```
-
 Questo componente gestisce il processo di minting. Utilizza usePrepareContractWrite per preparare la transazione, useContractWrite per eseguirla, e useWaitForTransaction per monitorarne lo stato. L'utente può specificare la quantità di Shard da mintare. La funzione è payable quindi prma bisogna chiamare **currentPrice** e poi passrlo per la funzione **getEthPrice**
-
 ```javascript
 MintShard() {
   const [amount, setAmount] = useState('1')
@@ -229,7 +216,6 @@ MintShard() {
 ## Funzioni amministrative
 
 ### setPrice
-
 ```solidity
 //Questo funzione payable permette di fissare il prezzo in GBP*100
 function setPrice(uint256 newPriceInPence) external onlyOwner {
@@ -238,9 +224,7 @@ function setPrice(uint256 newPriceInPence) external onlyOwner {
         emit PriceUpdated(newPriceInPence);
     }
 ```
-
 Questo componente permette al proprietario del contratto di impostare un nuovo prezzo per il minting.
-
 ```javascript
 function SetPrice() {
   const [newPrice, setNewPrice] = useState('')
@@ -267,7 +251,6 @@ function SetPrice() {
 ```
 
 ### withdraw e recoverERC20
-
 ```solidity
 //Questo funzione permette di ritirare i fondi ETH dal contratto, è chiamabile solo dall'owner
 function withdraw() external onlyOwner nonReentrant {
@@ -277,7 +260,6 @@ function withdraw() external onlyOwner nonReentrant {
         require(success, "Withdrawal failed");
     }
 ```
-
 ```solidity
 //Questo funzione permette di ritirare i fondi ERC20 dl contratto, è chiamabile solo dall'owner
 function recoverERC20(address tokenAddress, uint256 tokenAmount) external onlyOwner {
@@ -285,5 +267,4 @@ function recoverERC20(address tokenAddress, uint256 tokenAmount) external onlyOw
         emit ERC20Recovered(tokenAddress, tokenAmount);
     }
 ```
-
 Questo funzioni permettono al proprietario del contratto di prelevare i fondi accumulati.
