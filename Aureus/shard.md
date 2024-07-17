@@ -39,7 +39,7 @@ function App() {
     </WagmiConfig>
   )
 }
-'''
+```
 
 ## Questa configurazione inizializza Wagmi per interagire con la mainnet Ethereum usando MetaMask come connettore principale.
 
@@ -68,6 +68,9 @@ function SupplyInfo() {
     </div>
   )
 }
+```
+
+
 Questo componente mostra il numero totale di Shard NFT emessi e quanti possono ancora essere mintati.
 getEthPrice
 javascriptCopyfunction PriceInfo() {
