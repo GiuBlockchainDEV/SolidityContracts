@@ -253,4 +253,3 @@ function recoverERC20(address tokenAddress, uint256 tokenAmount) external onlyOw
         emit ERC20Recovered(tokenAddress, tokenAmount);
     }
 ```
-Questo funzioni permettono al proprietario del contratto di prelevare i fondi accumulati.
