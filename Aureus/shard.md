@@ -72,7 +72,7 @@ Questo componente mostra il numero totale di Shard NFT emessi e quanti possono a
 
 ### getEthPrice
 
-```
+```javascript
 function PriceInfo() {
   const [penceAmount, setPenceAmount] = useState('1000')
   const { data: ethPrice } = useContractRead({
@@ -98,7 +98,7 @@ Questo componente permette agli utenti di calcolare il prezzo in ETH per un dato
 
 ### balanceOf
 
-```
+```javascript
  UserBalance() {
   const { address } = useAccount()
   const { data: balance } = useContractRead({
@@ -117,7 +117,7 @@ Questo componente mostra il saldo di Shard NFT dell'utente corrente.
 
 ### mintShard
 
-```
+```javascript
 MintShard() {
   const [amount, setAmount] = useState('1')
 
@@ -157,7 +157,7 @@ Questo componente permette agli utenti di mintare nuovi Shard NFT.
 
 ### setPrice
 
-```
+```javascript
 function SetPrice() {
   const [newPrice, setNewPrice] = useState('')
 
@@ -185,7 +185,7 @@ Questo componente permette al proprietario del contratto di impostare un nuovo p
 
 ### withdraw
 
-```
+```javascript
 function WithdrawFunds() {
   const { config } = usePrepareContractWrite({
     address: shardNFTAddress,
