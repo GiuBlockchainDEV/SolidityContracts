@@ -8,8 +8,6 @@ Questa è un'implementazione frontend per il contratto ShardNFT utilizzando Reac
 - [Funzioni di lettura](#funzioni-di-lettura)
 - [Funzioni di scrittura](#funzioni-di-scrittura)
 - [Funzioni amministrative](#funzioni-amministrative)
-- [Gestione degli eventi](#gestione-degli-eventi)
-- [Note aggiuntive](#note-aggiuntive)
 
 ## Configurazione iniziale
 
