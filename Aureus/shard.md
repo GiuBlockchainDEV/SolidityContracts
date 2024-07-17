@@ -39,6 +39,7 @@ function App() {
     </WagmiConfig>
   )
 }
+'''
 
 ## Questa configurazione inizializza Wagmi per interagire con la mainnet Ethereum usando MetaMask come connettore principale.
 
