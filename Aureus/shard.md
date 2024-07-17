@@ -40,12 +40,11 @@ function App() {
   )
 }
 ```
+Questa configurazione inizializza Wagmi per interagire con la mainnet Ethereum usando MetaMask come connettore principale.
 
-## Questa configurazione inizializza Wagmi per interagire con la mainnet Ethereum usando MetaMask come connettore principale.
+## Funzioni di lettura
 
-### Funzioni di lettura
-
-#### totalSupply e remainingSupply
+### totalSupply e remainingSupply
 
 ```javascript
 function SupplyInfo() {
@@ -69,11 +68,12 @@ function SupplyInfo() {
   )
 }
 ```
-
-
 Questo componente mostra il numero totale di Shard NFT emessi e quanti possono ancora essere mintati.
-getEthPrice
-javascriptCopyfunction PriceInfo() {
+
+### getEthPrice
+
+```
+function PriceInfo() {
   const [penceAmount, setPenceAmount] = useState('1000')
   const { data: ethPrice } = useContractRead({
     address: shardNFTAddress,
@@ -93,9 +93,13 @@ javascriptCopyfunction PriceInfo() {
     </div>
   )
 }
+```
 Questo componente permette agli utenti di calcolare il prezzo in ETH per un dato importo in pence.
-balanceOf
-javascriptCopyfunction UserBalance() {
+
+### balanceOf
+
+```
+ UserBalance() {
   const { address } = useAccount()
   const { data: balance } = useContractRead({
     address: shardNFTAddress,
@@ -106,10 +110,15 @@ javascriptCopyfunction UserBalance() {
 
   return <p>Your Shard balance: {balance?.toString()}</p>
 }
+```
 Questo componente mostra il saldo di Shard NFT dell'utente corrente.
-Funzioni di scrittura
-mintShard
-javascriptCopyfunction MintShard() {
+
+## Funzioni di scrittura
+
+### mintShard
+
+```
+MintShard() {
   const [amount, setAmount] = useState('1')
 
   const { config } = usePrepareContractWrite({
@@ -141,10 +150,15 @@ javascriptCopyfunction MintShard() {
     </div>
   )
 }
+```
 Questo componente permette agli utenti di mintare nuovi Shard NFT.
-Funzioni amministrative
-setPrice
-javascriptCopyfunction SetPrice() {
+
+## Funzioni amministrative
+
+### setPrice
+
+```
+function SetPrice() {
   const [newPrice, setNewPrice] = useState('')
 
   const { config } = usePrepareContractWrite({
@@ -166,9 +180,13 @@ javascriptCopyfunction SetPrice() {
     </div>
   )
 }
+```
 Questo componente permette al proprietario del contratto di impostare un nuovo prezzo per il minting.
-withdraw
-javascriptCopyfunction WithdrawFunds() {
+
+### withdraw
+
+```
+WithdrawFunds() {
   const { config } = usePrepareContractWrite({
     address: shardNFTAddress,
     abi: shardNFTABI,
@@ -178,31 +196,5 @@ javascriptCopyfunction WithdrawFunds() {
 
   return <button onClick={() => write?.()}>Withdraw Funds</button>
 }
+```
 Questo componente permette al proprietario del contratto di prelevare i fondi accumulati.
-Altre funzioni amministrative
-Implementazioni simili sono fornite per setURI, pause, unpause, e recoverERC20.
-Gestione degli eventi
-javascriptCopyfunction EventListener() {
-  useContractEvent({
-    address: shardNFTAddress,
-    abi: shardNFTABI,
-    eventName: 'ShardsMinted',
-    listener(log) {
-      console.log('ShardsMinted', log)
-      // Aggiorna lo stato dell'app o mostra una notifica
-    },
-  })
-
-  // Implementa listener simili per altri eventi (ShardsBurned, PriceUpdated, etc.)
-
-  return null
-}
-Questo componente ascolta e reagisce agli eventi emessi dal contratto.
-Note aggiuntive
-
-Assicurati di gestire correttamente gli errori e di fornire feedback appropriato all'utente per tutte le interazioni con il contratto.
-Implementa controlli per assicurarti che solo l'owner del contratto possa accedere alle funzioni amministrative.
-Considera l'implementazione di un sistema di caching per ridurre il numero di chiamate alla blockchain.
-Testa accuratamente tutte le funzionalità in un ambiente di test prima di deployare in produzione.
-
-Questa implementazione frontend fornisce un'interfaccia completa per interagire con tutte le funzioni principali del contratto ShardNFT, utilizzando Wagmi per semplificare le interazioni con la blockchain Ethereum e React per creare un'interfaccia utente reattiva e user-friendly.
