@@ -230,6 +230,17 @@ MintShard() {
 
 ### setPrice
 
+```solidity
+//Questo funzione payable permette di fissare il prezzo in GBP*100
+function setPrice(uint256 newPriceInPence) external onlyOwner {
+        require(newPriceInPence > 0, "Price must be greater than zero");
+        currentPrice = newPriceInPence;
+        emit PriceUpdated(newPriceInPence);
+    }
+```
+
+Questo componente permette al proprietario del contratto di impostare un nuovo prezzo per il minting.
+
 ```javascript
 function SetPrice() {
   const [newPrice, setNewPrice] = useState('')
@@ -254,20 +265,25 @@ function SetPrice() {
   )
 }
 ```
-Questo componente permette al proprietario del contratto di impostare un nuovo prezzo per il minting.
 
-### withdraw
+### withdraw e recoverERC20
 
-```javascript
-function WithdrawFunds() {
-  const { config } = usePrepareContractWrite({
-    address: shardNFTAddress,
-    abi: shardNFTABI,
-    functionName: 'withdraw',
-  })
-  const { write } = useContractWrite(config)
-
-  return <button onClick={() => write?.()}>Withdraw Funds</button>
-}
+```solidity
+//Questo funzione permette di ritirare i fondi ETH dal contratto, è chiamabile solo dall'owner
+function withdraw() external onlyOwner nonReentrant {
+        uint256 balance = address(this).balance;
+        require(balance > 0, "No funds to withdraw");
+        (bool success, ) = payable(owner()).call{value: balance}("");
+        require(success, "Withdrawal failed");
+    }
 ```
-Questo componente permette al proprietario del contratto di prelevare i fondi accumulati.
+
+```solidity
+//Questo funzione permette di ritirare i fondi ERC20 dl contratto, è chiamabile solo dall'owner
+function recoverERC20(address tokenAddress, uint256 tokenAmount) external onlyOwner {
+        IERC20(tokenAddress).transfer(owner(), tokenAmount);
+        emit ERC20Recovered(tokenAddress, tokenAmount);
+    }
+```
+
+Questo funzioni permettono al proprietario del contratto di prelevare i fondi accumulati.
