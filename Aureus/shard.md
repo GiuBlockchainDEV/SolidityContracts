@@ -44,16 +44,16 @@ Questa configurazione inizializza Wagmi per interagire con la mainnet Ethereum u
 ## Variabili in lettura
 
 ```solidity
-//  prezzo di una shard in GPB*100
+//Prezzo di una shard in GPB*100
 uint256 public currentPrice;
 
-//  supply massima delle shard
+//Supply massima delle shard
 uint256 public constant MAX_SUPPLY = 25000;
 
-//  massimo ammontare di shrd acquistabili in una transazione
+//Massimo ammontare di shrd acquistabili in una transazione
 uint256 public constant MAX_MINT_PER_TX = 5;
 
-//  totale shard mintate
+//Totale shard mintate
 uint256 public totalMinted = 0;
 ```
 
@@ -62,12 +62,13 @@ uint256 public totalMinted = 0;
 ### totalSupply e remainingSupply
 
 ```solidity
-//  Questo componente mostra il numero totale di Shard NFT emessi
+//Questo componente mostra il numero totale di Shard NFT emessi
 function totalSupply() public view returns (uint256) {
         return totalMinted;
     }
 
-//  Questo componente mostra il numero totale di Shard NFT rimamenti da mintare
+
+//Questo componente mostra il numero totale di Shard NFT rimamenti da mintare
 function remainingSupply() public view returns (uint256) {
         return MAX_SUPPLY - totalMinted;
     }
