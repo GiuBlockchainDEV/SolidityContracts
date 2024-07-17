@@ -186,7 +186,7 @@ Questo componente permette al proprietario del contratto di impostare un nuovo p
 ### withdraw
 
 ```
-WithdrawFunds() {
+function WithdrawFunds() {
   const { config } = usePrepareContractWrite({
     address: shardNFTAddress,
     abi: shardNFTABI,
