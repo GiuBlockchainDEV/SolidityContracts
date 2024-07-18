@@ -253,3 +253,17 @@ function recoverERC20(address tokenAddress, uint256 tokenAmount) external onlyOw
         emit ERC20Recovered(tokenAddress, tokenAmount);
     }
 ```
+### pause
+```solidity
+//Questo funzione permette all' owner di mettere in pausa il contratto
+function pause() external onlyOwner {
+        _pause();
+    }
+```
+### unpause
+```solidity
+//Questo funzione permette all'owner di togliere dalla pausa il contratto
+function unpause() external onlyOwner {
+        _unpause();
+    }
+```
