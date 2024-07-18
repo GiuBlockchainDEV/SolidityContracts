@@ -62,7 +62,9 @@ sequenceDiagram
     participant Frontend
     participant User
     participant AureusNFT
+    participant Alchemy
 
+    Frontend->>Alchemy: Recupera il balance e l'ID dei token posseduti dall'utente
     Frontend->>User: Richiede ID del token
     User->>Frontend: Inserisce ID del token
     Frontend->>AureusNFT: getTokenTraits(tokenId)
