@@ -5,8 +5,6 @@ Questa è un'implementazione frontend per il contratto AureusNFT utilizzando Rea
 - [Funzioni di lettura](#funzioni-di-lettura)
 - [Funzioni di scrittura](#funzioni-di-scrittura)
 - [Funzioni amministrative](#funzioni-amministrative)
-- [Gestione degli eventi](#gestione-degli-eventi)
-- [Note aggiuntive](#note-aggiuntive)
 ## Configurazione iniziale
 Per iniziare, configura Wagmi nel tuo progetto React:
 ```javascript
