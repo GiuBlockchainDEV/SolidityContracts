@@ -57,6 +57,19 @@ function getTokenTraits(uint256 tokenId) public view returns (TokenTraits memory
     }
 ```
 Questo componente mostra i tratti di un token Aureus NFT specifico.
+```mermaid
+sequenceDiagram
+    participant Frontend
+    participant User
+    participant AureusNFT
+
+    Frontend->>User: Richiede ID del token
+    User->>Frontend: Inserisce ID del token
+    Frontend->>AureusNFT: getTokenTraits(tokenId)
+    AureusNFT->>AureusNFT: Check token exists
+    AureusNFT-->>Frontend: Return TokenTraits struct
+    Frontend->>User: Mostra dettagli del token
+```
 ```javascript
 function TokenTraitsInfo({ tokenId }) {
   const { data: tokenTraits } = useContractRead({
@@ -199,6 +212,27 @@ function mintAureus() external nonReentrant whenNotPaused {
         }
     }
 ```
+```mermaid
+sequenceDiagram
+    participant Frontend
+    participant User
+    participant AureusNFT
+    participant ShardNFT
+
+    Frontend->>User: Richiede conferma per mintare Aureus
+    User->>Frontend: Conferma mintaggio
+    Frontend->>AureusNFT: mintAureus()
+    AureusNFT->>ShardNFT: balanceOf(user)
+    ShardNFT-->>AureusNFT: Shard balance
+    AureusNFT->>AureusNFT: Check sufficient balance, minimo 5
+    AureusNFT->>ShardNFT: burnShard(user, SHARDS_REQUIRED)
+    ShardNFT-->>AureusNFT: Confirm burn
+    AureusNFT->>AureusNFT: Mint new Aureus NFT
+    AureusNFT->>AureusNFT: Set token traits
+    AureusNFT->>User: Transfer Aureus NFT
+    AureusNFT-->>Frontend: Conferma mintaggio
+    Frontend->>User: Mostra dettagli nuovo Aureus NFT
+```
 Questo componente permette agli utenti di mintare un nuovo Aureus NFT. La funzione richiede un **balanceOf** di shard maggiore o  uguale a 5
 ```javascript
 function MintAureus() {
@@ -305,6 +339,36 @@ function addService(uint256 tokenId, uint256 serviceId) external payable nonReen
     }
 ```
 Questo componente permette agli utenti di aggiornare il grado di un Aureus NFT.
+```mermaid
+sequenceDiagram
+    participant Frontend
+    participant User
+    participant AureusNFT
+    participant Chainlink
+
+    Frontend->>User: Mostra ID dei token posseduti 
+    User->>Frontend: Seleziona token da upgradare
+    Frontend->>AureusNFT: Controlla prezzo in GBP*100 per chiamare la funzione -> update_price
+    AureusNFT->>Chainlink: getEthPrice(update_price)
+    Chainlink-->>AureusNFT: ETH price
+    Frontend->>AureusNFT: upgradeToken(tokenId)
+    AureusNFT->>AureusNFT: Check token exists and ownership
+    AureusNFT-->>Frontend: Richiede pagamento
+    Frontend->>User: Mostra costo upgrade
+    User->>Frontend: Conferma pagamento
+    Frontend->>AureusNFT: Invia pagamento
+    alt Sufficient payment
+        AureusNFT->>AureusNFT: Upgrade token grade
+        AureusNFT->>AureusNFT: Update token value
+        AureusNFT->>User: Refund excess ETH
+        AureusNFT->>AureusNFT: Emit TokenGraded event
+        AureusNFT-->>Frontend: Conferma upgrade
+        Frontend->>User: Mostra nuovo grado e valore del token
+    else Insufficient payment
+        AureusNFT-->>Frontend: Errore: pagamento insufficiente
+        Frontend->>User: Mostra errore
+    end
+```
 ```javascript
 function UpgradeToken({ tokenId }) {
   const { data: ethPrice } = useContractRead({
@@ -340,6 +404,42 @@ function UpgradeToken({ tokenId }) {
 }
 ```
 Questo componente permette agli utenti di aggiungere un servizio a un Aureus NFT.
+```mermaid
+sequenceDiagram
+    participant Frontend
+    participant User
+    participant AureusNFT
+    participant Chainlink
+
+    Frontend->>User: Mostra servizi disponibili
+    User->>Frontend: Seleziona servizio da aggiungere
+    Frontend->>User: Mostra ID dei token posseduti 
+    User->>Frontend: Selenzione ID del token scelto 
+    Frontend->>AureusNFT: Controlla i tipi di servizi che ci sono per recuperare il loro ID ed il prezzo
+    Frontend->>AureusNFT: Controlla prezzo in GBP*100 per chiamare la funzione -> update_price
+    AureusNFT->>Chainlink: getEthPrice(vaulting_price/insurance_price/transportation_price/administration_price)
+    Chainlink-->>AureusNFT: ETH price
+    Frontend->>AureusNFT: addService(tokenId, serviceId)
+    AureusNFT->>AureusNFT: Check token exists and ownership
+    AureusNFT->>AureusNFT: Determine service and price
+    AureusNFT->>Chainlink: getEthPrice(servicePrice)
+    Chainlink-->>AureusNFT: ETH price
+    AureusNFT-->>Frontend: Richiede pagamento
+    Frontend->>User: Mostra costo servizio
+    User->>Frontend: Conferma pagamento
+    Frontend->>AureusNFT: Invia pagamento
+    alt Sufficient payment
+        AureusNFT->>AureusNFT: Add service to token
+        AureusNFT->>AureusNFT: Update token value
+        AureusNFT->>User: Refund excess ETH
+        AureusNFT->>AureusNFT: Emit ServiceAdded event
+        AureusNFT-->>Frontend: Conferma aggiunta servizio
+        Frontend->>User: Mostra conferma e nuovo valore del token
+    else Insufficient payment
+        AureusNFT-->>Frontend: Errore: pagamento insufficiente
+        Frontend->>User: Mostra errore
+    end
+```
 ```javascript
 function AddService({ tokenId, serviceId }) {
   const { data: ethPrice } = useContractRead({
