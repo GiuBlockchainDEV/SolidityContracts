@@ -165,6 +165,37 @@ function mintShard(uint256 amount) external payable nonReentrant whenNotPaused {
         emit ShardsMinted(msg.sender, amount);
     }
 ```
+```mermaid
+sequenceDiagram
+    participant Frontend
+    participant User
+    participant ShardNFT
+    participant Chainlink
+
+    Frontend->>User: Richiede input per quantità
+    User->>Frontend: Inserisce quantità
+    Frontend->>ShardNFT: chiede il currentPrice
+    ShardNFT->>Chainlink: getEthPrice(currentPrice)
+    Chainlink-->>ShardNFT: ETH price
+    Frontend->>ShardNFT: mintShard(amount * ETH price)
+    ShardNFT->>ShardNFT: Check supply limits
+    ShardNFT->>ShardNFT: Calculate ETH price
+    ShardNFT-->>Frontend: Richiede pagamento
+    Frontend->>User: Mostra importo da pagare
+    User->>Frontend: Conferma pagamento
+    Frontend->>ShardNFT: Invia pagamento
+    alt Sufficient payment
+        ShardNFT->>ShardNFT: Mint Shards
+        ShardNFT->>User: Transfer Shards
+        ShardNFT->>User: Refund excess ETH
+        ShardNFT->>ShardNFT: Emit ShardsMinted event
+        ShardNFT-->>Frontend: Conferma transazione
+        Frontend->>User: Mostra conferma e nuovo saldo
+    else Insufficient payment
+        ShardNFT-->>Frontend: Errore: pagamento insufficiente
+        Frontend->>User: Mostra errore
+    end
+```
 Questo componente gestisce il processo di minting. Utilizza usePrepareContractWrite per preparare la transazione, useContractWrite per eseguirla, e useWaitForTransaction per monitorarne lo stato. L'utente può specificare la quantità di Shard da mintare. La funzione è payable quindi prma bisogna chiamare **currentPrice** e poi passrlo per la funzione **getEthPrice**
 ```javascript
 MintShard() {
